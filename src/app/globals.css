@@ -1,0 +1,79 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ==========================================================================
+     THEME DESIGN TOKENS (Easily customize colors & appearance here!)
+     ========================================================================== */
+  
+  /* Core Canvas */
+  --background: #02040a;
+  --foreground: #f8fafc;
+
+  /* Cosmic Space Background Palette */
+  --cosmic-950: #02040a;
+  --cosmic-900: #050914;
+  --cosmic-850: #080f20;
+  --cosmic-800: #0c152d;
+  --cosmic-700: #132044;
+  --cosmic-600: #1c2e5e;
+
+  /* Celestial Accents */
+  --starlight-cyan: #38bdf8;
+  --starlight-amber: #f59e0b;
+  --starlight-gold: #fbbf24;
+  --starlight-emerald: #10b981;
+
+  /* Text Colors */
+  --text-heading: #f8fafc;
+  --text-body: #cbd5e1;
+  --text-muted: #64748b;
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: var(--font-sans), var(--font-inter), var(--font-bengali), system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* ==========================================================================
+   CENTRALIZED TYPOGRAPHY DEFAULTS
+   ========================================================================== */
+@layer base {
+  /* 1. All Headings automatically inherit Alkatra (Display/Title font) */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-alkatra), serif;
+  }
+
+  /* 2. Blockquotes, callout notes & subtitles automatically inherit Delius */
+  blockquote, .subheading {
+    font-family: var(--font-delius), cursive, sans-serif;
+  }
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cosmic-950);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #334155;
+}
+
+/* Smooth selection */
+::selection {
+  background-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
