@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Compass,
@@ -11,14 +12,23 @@ import {
   Lock,
   Sparkles,
 } from "lucide-react";
-import { InteractiveGalaxy } from "@/components/canvas/InteractiveGalaxy";
+
+// Dynamically import heavy Three.js 3D WebGL background to prevent SSR blocking and hydration freezing
+const InteractiveGalaxy = dynamic(
+  () => import("@/components/canvas/InteractiveGalaxy").then((mod) => mod.InteractiveGalaxy),
+  {
+    ssr: false,
+    loading: () => <div className="fixed inset-0 bg-[#02040a] -z-10" />,
+  }
+);
+
 import { CosmicHubDrawer, ModuleType } from "@/components/navigation/CosmicHubDrawer";
 import { SecretGate } from "@/components/gate/SecretGate";
 import { APP_CONFIG } from "@/lib/constants";
 
 interface CosmicPageShellProps {
   title: string;
-  bengaliTitle: string;
+  bengaliTitle?: string;
   activeModule?: ModuleType;
   children: React.ReactNode;
   requireUnlock?: boolean;
@@ -96,7 +106,10 @@ export function CosmicPageShell({
       <InteractiveGalaxy onInspectChange={setIsInspectingGalaxy} />
 
       {/* Top Ambient Navigation Bar */}
-      <header className="relative z-30 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 backdrop-blur-md">
+      <header
+        className="relative z-30 w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between border-b border-white/5 backdrop-blur-md"
+        style={{ position: "relative", zIndex: 30, width: "100%" }}
+      >
         {/* Left: Back to Horizon / Home */}
         <div className="flex items-center gap-3">
           <Link
@@ -120,10 +133,10 @@ export function CosmicPageShell({
         <div className="hidden md:flex items-center gap-2 px-3.5 py-1 rounded-full bg-slate-900/60 border border-white/10 text-xs">
           <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
           <span className="text-slate-200 font-heading font-medium">
-            {bengaliTitle}
+            {title}
           </span>
-          {bengaliTitle !== title && (
-            <span className="text-[10px] font-badge text-cyan-300/80">({title})</span>
+          {bengaliTitle && bengaliTitle !== title && (
+            <span className="text-[10px] font-badge text-cyan-300/80">({bengaliTitle})</span>
           )}
         </div>
 
@@ -152,23 +165,29 @@ export function CosmicPageShell({
       </header>
 
       {/* Main Page Body */}
-      <main className="relative z-10 flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 md:py-10">
+      <main
+        className="relative z-10 flex-1 w-full max-w-6xl mx-auto px-3 sm:px-6 py-6 md:py-10"
+        style={{ position: "relative", zIndex: 10, flex: 1, width: "100%" }}
+      >
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
+          initial={false}
           animate={{
             opacity: isInspectingGalaxy ? 0 : 1,
             y: isInspectingGalaxy ? 15 : 0,
             filter: isInspectingGalaxy ? "blur(10px)" : "blur(0px)",
             pointerEvents: isInspectingGalaxy ? "none" : "auto",
           }}
-          transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}
         </motion.div>
       </main>
 
       {/* Persistent Cosmic Footer */}
-      <footer className="relative z-10 max-w-4xl mx-auto w-full px-6 py-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+      <footer
+        className="relative z-10 max-w-4xl mx-auto w-full px-6 py-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500"
+        style={{ position: "relative", zIndex: 10, width: "100%" }}
+      >
         <div className="flex items-center gap-2">
           <Compass className="w-4 h-4 text-cyan-400 animate-spin-slow" />
           <span className="font-heading tracking-widest text-slate-300 font-medium uppercase">

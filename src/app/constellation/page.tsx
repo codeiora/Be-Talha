@@ -3,7 +3,7 @@ import { CosmicPageShell } from "@/components/layout/CosmicPageShell";
 import { ConstellationSection } from "@/components/constellation/ConstellationSection";
 
 export const metadata: Metadata = {
-  title: "The Constellation • Winged Morning Star | Be Talha",
+  title: "The Winged Morning Star • Celestial Goals | Be Talha",
   description:
     "Evolution of Goals: The Winged Morning Star — Transcending limitations to radiate singular light across the cosmos.",
 };
@@ -11,8 +11,7 @@ export const metadata: Metadata = {
 export default function ConstellationPage() {
   return (
     <CosmicPageShell
-      title="The Constellation"
-      bengaliTitle="Evolution of Goals • Winged Morning Star"
+      title="The Winged Morning Star"
       activeModule="constellation"
     >
       <ConstellationSection />

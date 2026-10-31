@@ -7,24 +7,23 @@ import {
   X,
   Star,
   Flame,
-  Quote,
+  Mail,
   Clock,
   Compass,
   Layers,
-  Sparkles,
   Lock,
-  BookOpen,
-  ArrowRight,
-  ShieldCheck,
   CheckCircle2,
+  Target,
 } from "lucide-react";
 
 export type ModuleType =
+  | "milestones"
   | "constellation"
   | "crucible"
   | "letter"
   | "waqt"
   | "codex"
+  | "hifz"
   | null;
 
 interface CosmicHubDrawerProps {
@@ -35,76 +34,107 @@ interface CosmicHubDrawerProps {
   onLock?: () => void;
 }
 
-interface ActionModule {
+interface HubModule {
   id: ModuleType;
   title: string;
-  bengaliTitle: string;
   description: string;
   icon: React.ElementType;
   color: string;
-  badge: string;
 }
 
-interface VisitModule {
-  id: ModuleType;
-  title: string;
-  bengaliTitle: string;
-  description: string;
-  icon: React.ElementType;
-  color: string;
-  badge: string;
+/**
+ * Custom illuminated Holy Quran Icon
+ * Designed specifically for "In Search of Light" (Quran Memorization & Revision)
+ */
+export function QuranIcon({
+  className = "w-4 h-4",
+  ...props
+}: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      {...props}
+    >
+      {/* Open Holy Quran pages */}
+      <path d="M2 4.5C5.5 3 8.5 4 12 5.8C15.5 4 18.5 3 22 4.5V19C18.5 17.5 15.5 18.5 12 20.3C8.5 18.5 5.5 17.5 2 19V4.5Z" />
+      {/* Center spine */}
+      <line x1="12" y1="6" x2="12" y2="20" strokeWidth="1.5" />
+      {/* Center bookmark ribbon */}
+      <path
+        d="M12 6V13.5L10 12L8 13.5V6"
+        fill="currentColor"
+        fillOpacity="0.3"
+        strokeWidth="1.5"
+      />
+      {/* Sacred Scripture lines */}
+      <line x1="5" y1="9" x2="8" y2="8.3" strokeWidth="1.5" strokeOpacity="0.8" />
+      <line x1="5" y1="12.5" x2="8" y2="11.8" strokeWidth="1.5" strokeOpacity="0.8" />
+      <line x1="16" y1="8.3" x2="19" y2="9" strokeWidth="1.5" strokeOpacity="0.8" />
+      <line x1="16" y1="11.8" x2="19" y2="12.5" strokeWidth="1.5" strokeOpacity="0.8" />
+    </svg>
+  );
 }
 
-// 1. LEFT COLUMN: Active Work & Tasks
-const WORK_MODULES: ActionModule[] = [
+// 1. LEFT COLUMN: Active Work & Goals
+const WORK_MODULES: HubModule[] = [
+  {
+    id: "milestones",
+    title: "Celestial Milestones",
+    description: "Daily Sparks, Weekly Sprints, Monthly Orbits, and Yearly Cascading Horizons.",
+    icon: Target,
+    color: "text-violet-300 bg-violet-500/20 border-violet-400/40",
+  },
+  {
+    id: "hifz",
+    title: "In Search of Light",
+    description: "Quran memorization & Fading Stars revision tracker across the 114 celestial clusters.",
+    icon: QuranIcon,
+    color: "text-amber-300 bg-amber-500/20 border-amber-400/40",
+  },
   {
     id: "constellation",
-    title: "The Constellation",
-    bengaliTitle: "The Winged Morning Star",
-    description: "Transcending limitations to radiate singular light across the cosmos—long-term goals & celestial canvas.",
+    title: "The Winged Morning Star",
+    description: "Transcending limitations to radiate singular light across the cosmos—long-term goals & canvas.",
     icon: Star,
     color: "text-cyan-300 bg-cyan-500/20 border-cyan-400/40",
-    badge: "Night Sky Canvas",
   },
   {
     id: "crucible",
-    title: "The Crucible",
-    bengaliTitle: "Inner Crucible",
+    title: "The Inner Crucible",
     description: "Admitting errors, shedding flaws, and deep self-examination.",
     icon: Flame,
     color: "text-amber-300 bg-amber-500/20 border-amber-400/40",
-    badge: "Inner Forge",
   },
 ];
 
-// 2. RIGHT COLUMN: Visit, Read & Reflect
-const VISIT_MODULES: VisitModule[] = [
+// 2. RIGHT COLUMN: Sanctuary & Principles
+const VISIT_MODULES: HubModule[] = [
   {
     id: "letter",
-    title: "Sacred Vault",
-    bengaliTitle: "Care of Childhood (Letter)",
+    title: "Care of Childhood",
     description: "Special letter from Psycho Behen: “Never stray from the center point.”",
-    icon: Quote,
+    icon: Mail,
     color: "text-rose-300 bg-rose-500/20 border-rose-400/40",
-    badge: "Sacred Letter",
   },
   {
     id: "waqt",
-    title: "Celestial Waqt",
-    bengaliTitle: "Waqt & Salah Dashboard",
+    title: "Celestial Waqt & Salah",
     description: "Daily Salah tracker, prayer timetable, and weekly-monthly-yearly analytics.",
     icon: Clock,
     color: "text-emerald-300 bg-emerald-500/20 border-emerald-400/40",
-    badge: "Dashboard",
   },
   {
     id: "codex",
     title: "The Root Codex",
-    bengaliTitle: "Root Principles & Philosophy",
     description: "Life compass, anchor points, and inspirational wisdom.",
     icon: Compass,
     color: "text-indigo-300 bg-indigo-500/20 border-indigo-400/40",
-    badge: "Guidance",
   },
 ];
 
@@ -126,6 +156,7 @@ export function CosmicHubDrawer({
     }
     onClose();
   };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -166,9 +197,6 @@ export function CosmicHubDrawer({
                 <div>
                   <h2 className="text-base font-heading font-semibold text-slate-50 flex items-center gap-2">
                     Cosmic Hub
-                    <span className="text-[10px] font-badge text-cyan-300 bg-cyan-950/80 px-2.5 py-0.5 rounded-full border border-cyan-500/40 shadow-sm shadow-cyan-500/10">
-                      Navigation
-                    </span>
                   </h2>
                 </div>
               </div>
@@ -196,9 +224,6 @@ export function CosmicHubDrawer({
                       <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
                       Workspace & Endeavor
                     </span>
-                    <span className="text-[10px] font-badge text-cyan-400/80 bg-cyan-950/60 border border-cyan-500/20 px-2 py-0.5 rounded-full">
-                      Action Forge
-                    </span>
                   </div>
 
                   <div className="space-y-2.5">
@@ -223,15 +248,10 @@ export function CosmicHubDrawer({
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <h4 className="text-xs font-heading font-medium text-slate-100 group-hover:text-cyan-200 transition-colors">
-                                {item.bengaliTitle}
-                              </h4>
-                              <span className="text-[9px] font-badge text-cyan-300 bg-cyan-950/80 border border-cyan-500/30 px-1.5 py-0.5 rounded">
-                                {item.badge}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-300/90 font-subheading mt-1 line-clamp-2 leading-relaxed">
+                            <h4 className="text-xs sm:text-sm font-heading font-semibold text-slate-100 group-hover:text-cyan-200 transition-colors">
+                              {item.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-300/85 font-subheading mt-1 line-clamp-2 leading-relaxed">
                               {item.description}
                             </p>
                           </div>
@@ -258,9 +278,6 @@ export function CosmicHubDrawer({
                       <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                       Sanctuary & Principles
                     </span>
-                    <span className="text-[10px] font-badge text-amber-400/80 bg-amber-950/60 border border-amber-500/20 px-2 py-0.5 rounded-full">
-                      Sanctuary & Archive
-                    </span>
                   </div>
 
                   <div className="space-y-2">
@@ -285,15 +302,10 @@ export function CosmicHubDrawer({
                           </div>
 
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1">
-                              <h4 className="text-xs font-heading font-medium text-slate-100 group-hover:text-amber-200 transition-colors">
-                                {item.bengaliTitle}
-                              </h4>
-                              <span className="text-[9px] font-badge text-amber-300 bg-amber-950/80 border border-amber-500/30 px-1.5 py-0.5 rounded">
-                                {item.badge}
-                              </span>
-                            </div>
-                            <p className="text-[11px] text-slate-300/90 font-subheading mt-0.5 line-clamp-1">
+                            <h4 className="text-xs sm:text-sm font-heading font-semibold text-slate-100 group-hover:text-amber-200 transition-colors">
+                              {item.title}
+                            </h4>
+                            <p className="text-[11px] text-slate-300/85 font-subheading mt-0.5 line-clamp-1">
                               {item.description}
                             </p>
                           </div>
@@ -305,15 +317,10 @@ export function CosmicHubDrawer({
                     {onLock && (
                       <button
                         onClick={onLock}
-                        className="w-full text-left p-2.5 rounded-2xl bg-slate-800/60 hover:bg-red-500/15 border border-white/10 hover:border-red-400/40 transition flex items-center justify-between group text-xs text-slate-300 hover:text-red-300 font-mono"
+                        className="w-full text-left p-2.5 rounded-2xl bg-slate-800/60 hover:bg-red-500/15 border border-white/10 hover:border-red-400/40 transition flex items-center gap-2.5 group text-xs text-slate-300 hover:text-red-300 font-mono"
                       >
-                        <div className="flex items-center gap-2">
-                          <Lock className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 transition-transform" />
-                          <span>Lock Chamber</span>
-                        </div>
-                        <span className="text-[9px] text-slate-500 group-hover:text-red-400">
-                          Secure
-                        </span>
+                        <Lock className="w-3.5 h-3.5 text-red-400 group-hover:scale-110 transition-transform" />
+                        <span>Lock Chamber</span>
                       </button>
                     )}
                   </div>

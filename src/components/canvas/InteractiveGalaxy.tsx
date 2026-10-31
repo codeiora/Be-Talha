@@ -1043,7 +1043,20 @@ export function InteractiveGalaxy({ onInspectChange }: InteractiveGalaxyProps) {
     <div
       ref={containerRef}
       className="fixed inset-0 z-0 pointer-events-auto overflow-hidden select-none"
-      style={{ touchAction: "none" }}
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100vw",
+        height: "100vh",
+        zIndex: 0,
+        pointerEvents: "auto",
+        overflow: "hidden",
+        userSelect: "none",
+        touchAction: "none",
+      }}
     >
       {/* 3D WebGL Canvas for 360-Degree Galaxy & Particles */}
       <canvas
@@ -1051,12 +1064,24 @@ export function InteractiveGalaxy({ onInspectChange }: InteractiveGalaxyProps) {
         className={`w-full h-full block transition-opacity duration-1000 ${
           isDragging ? "cursor-grabbing" : isGalaxyHovered ? "cursor-pointer" : "cursor-grab"
         }`}
+        style={{ width: "100%", height: "100%", display: "block" }}
       />
 
       {/* 2D Overlay Canvas for Celestial Mouse Trail & Ripples */}
       <canvas
         ref={cursorCanvasRef}
         className="fixed inset-0 pointer-events-none z-10"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: "100vw",
+          height: "100vh",
+          pointerEvents: "none",
+          zIndex: 10,
+        }}
       />
 
       {/* --- GALAXY HOVER TOOLTIP IN UNIVERSE MODE --- */}

@@ -43,14 +43,14 @@ body {
    CENTRALIZED TYPOGRAPHY DEFAULTS
    ========================================================================== */
 @layer base {
-  /* 1. All Headings automatically inherit Alkatra (Display/Title font) */
+  /* 1. All Headings automatically inherit Alkatra (Display/Title font with Atma for Bengali) */
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-alkatra), serif;
+    font-family: var(--font-alkatra), var(--font-bengali), serif;
   }
 
-  /* 2. Blockquotes, callout notes & subtitles automatically inherit Delius */
+  /* 2. Blockquotes, callout notes & subtitles automatically inherit Delius (with Atma for Bengali) */
   blockquote, .subheading {
-    font-family: var(--font-delius), cursive, sans-serif;
+    font-family: var(--font-delius), var(--font-bengali), cursive, sans-serif;
   }
 }
 

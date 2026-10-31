@@ -31,17 +31,17 @@ const config: Config = {
         sans: ["var(--font-sans)", "var(--font-inter)", "var(--font-bengali)", "sans-serif"],
         bengali: ["var(--font-bengali)", "sans-serif"],
 
-        // Headings & Titles: Alkatra
-        heading: ["var(--font-alkatra)", "serif"],
-        alkatra: ["var(--font-alkatra)", "serif"],
+        // Headings & Titles: Alkatra (with Atma fallback for Bengali)
+        heading: ["var(--font-alkatra)", "var(--font-bengali)", "serif"],
+        alkatra: ["var(--font-alkatra)", "var(--font-bengali)", "serif"],
 
-        // Subheadings, Descriptions & Quotes: Delius
-        subheading: ["var(--font-delius)", "cursive", "sans-serif"],
-        delius: ["var(--font-delius)", "cursive", "sans-serif"],
+        // Subheadings, Descriptions & Quotes: Delius (with Atma fallback for Bengali)
+        subheading: ["var(--font-delius)", "var(--font-bengali)", "cursive", "sans-serif"],
+        delius: ["var(--font-delius)", "var(--font-bengali)", "cursive", "sans-serif"],
 
-        // Badges, Tags, Buttons & Stats: Joti One
-        badge: ["var(--font-joti)", "cursive", "sans-serif"],
-        joti: ["var(--font-joti)", "cursive", "sans-serif"],
+        // Badges, Tags, Buttons & Stats: Joti One (with Atma fallback for Bengali)
+        badge: ["var(--font-joti)", "var(--font-bengali)", "cursive", "sans-serif"],
+        joti: ["var(--font-joti)", "var(--font-bengali)", "cursive", "sans-serif"],
       },
       animation: {
         "pulse-slow": "pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite",

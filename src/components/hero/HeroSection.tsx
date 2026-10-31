@@ -7,6 +7,7 @@ import {
   Compass,
   Sparkles,
   Lock,
+  Mail,
   Quote,
   Menu,
   Layers,
@@ -70,7 +71,7 @@ export function HeroSection({ onLock, onOpenMenu, onSelectModule }: HeroSectionP
             className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-badge text-amber-300/90 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition backdrop-blur-md"
             title="Care of: Childhood"
           >
-            <Quote className="w-3 h-3 text-amber-400" />
+            <Mail className="w-3 h-3 text-amber-400" />
             <span>Care of: Childhood</span>
           </Link>
 
@@ -164,6 +165,14 @@ export function HeroSection({ onLock, onOpenMenu, onSelectModule }: HeroSectionP
         transition={{ delay: 0.9 }}
         className="relative z-10 w-full max-w-2xl mx-auto px-4 py-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3"
       >
+        <Link
+          href="/hifz"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/70 hover:bg-slate-800/80 border border-amber-500/20 hover:border-amber-400/50 text-xs text-slate-300 hover:text-amber-200 transition backdrop-blur-md shadow-lg group"
+        >
+          <Sparkles className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span>Divine Constellation</span>
+        </Link>
+
         <Link
           href="/constellation"
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-900/70 hover:bg-slate-800/80 border border-cyan-500/20 hover:border-cyan-400/50 text-xs text-slate-300 hover:text-cyan-200 transition backdrop-blur-md shadow-lg group"
