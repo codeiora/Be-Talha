@@ -1,10 +1,14 @@
 export type HorizonType = "today" | "weekly" | "monthly" | "yearly";
 
 export type MilestonePanelSection =
+  | "daily"
   | "today_sparks"
   | "daily_notes"
+  | "weekly"
   | "weekly_sprints"
+  | "monthly"
   | "monthly_orbits"
+  | "yearly"
   | "yearly_horizon"
   | "murakaba_review"
   | "starlight_vault";

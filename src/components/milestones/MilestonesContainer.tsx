@@ -40,6 +40,7 @@ import {
   DEFAULT_MURAKABA_ENTRIES,
   getTodayDateKey,
 } from "@/lib/milestoneData";
+import { DailyHorizonDashboard } from "./tabs/DailyHorizonDashboard";
 import { TodaySparksTab } from "./tabs/TodaySparksTab";
 import { DailyNotesTab } from "./tabs/DailyNotesTab";
 import { WeeklySprintsTab } from "./tabs/WeeklySprintsTab";
@@ -58,7 +59,7 @@ interface MenuItem {
 }
 
 export function MilestonesContainer() {
-  const [activeSection, setActiveSection] = useState<MilestonePanelSection>("today_sparks");
+  const [activeSection, setActiveSection] = useState<MilestonePanelSection>("daily");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // States
@@ -217,12 +218,12 @@ export function MilestonesContainer() {
   // Sidebar Menu Groupings
   const MENU_GROUPS: { groupTitle: string; items: MenuItem[] }[] = [
     {
-      groupTitle: "Daily Horizon (আজকের দিন)",
+      groupTitle: "Core Horizon Decks (মূল দিগন্ত ড্যাশবোর্ড)",
       items: [
         {
-          id: "today_sparks",
-          label: "Today's Sparks",
-          bengali: "আজকের গোল ও অ্যাকশন",
+          id: "daily",
+          label: "Daily Horizon",
+          bengali: "দৈনিক ড্যাশবোর্ড ও স্পার্কস",
           icon: Flame,
           badge: pendingTodayCount > 0 ? `${pendingTodayCount} left` : "Done",
           badgeColor: pendingTodayCount > 0 ? "text-amber-300 bg-amber-500/20" : "text-emerald-300 bg-emerald-500/20",
@@ -239,7 +240,7 @@ export function MilestonesContainer() {
       groupTitle: "Celestial Horizons (ভবিষ্যতের রূপরেখা)",
       items: [
         {
-          id: "weekly_sprints",
+          id: "weekly",
           label: "Weekly Sprints",
           bengali: "সাপ্তাহিক স্প্রিন্ট",
           icon: Layers,
@@ -247,13 +248,13 @@ export function MilestonesContainer() {
           badgeColor: "text-indigo-300 bg-indigo-500/15",
         },
         {
-          id: "monthly_orbits",
+          id: "monthly",
           label: "Monthly Orbits",
           bengali: "মাসিক মাইলস্টোন",
           icon: Orbit,
         },
         {
-          id: "yearly_horizon",
+          id: "yearly",
           label: "Yearly Pillars",
           bengali: "বাৎসরিক দিগন্ত",
           icon: Star,
@@ -320,14 +321,14 @@ export function MilestonesContainer() {
             {/* User Profile & Momentum Header */}
             <div className="pb-4 border-b border-white/10 flex items-center justify-between">
               <div className="space-y-0.5">
-                <div className="text-xs font-mono text-slate-400 flex items-center gap-1.5">
+                <div className="text-xs font-badge text-slate-400 flex items-center gap-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
                   <span>COMMAND DECK</span>
                 </div>
-                <h3 className="text-sm font-bold text-white">Talha&apos;s Orbits</h3>
+                <h3 className="text-base font-heading text-white">Talha&apos;s Orbits</h3>
               </div>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30 text-xs font-mono font-semibold">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30 text-xs font-badge">
                 <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
                 <span>5d Streak</span>
               </div>
@@ -337,7 +338,7 @@ export function MilestonesContainer() {
             <div className="space-y-5">
               {MENU_GROUPS.map((group, idx) => (
                 <div key={idx} className="space-y-1.5">
-                  <div className="text-[10px] font-mono uppercase tracking-wider text-slate-500 px-2">
+                  <div className="text-xs font-subheading uppercase tracking-wider text-slate-400 px-2">
                     {group.groupTitle}
                   </div>
 
@@ -376,8 +377,8 @@ export function MilestonesContainer() {
                               }`}
                             />
                             <div className="min-w-0">
-                              <div className="font-semibold truncate">{item.label}</div>
-                              <div className="text-[10px] text-slate-500 truncate">
+                              <div className="font-subheading font-medium truncate">{item.label}</div>
+                              <div className="text-[11px] font-bengali text-slate-400 truncate">
                                 {item.bengali}
                               </div>
                             </div>
@@ -385,7 +386,7 @@ export function MilestonesContainer() {
 
                           {item.badge && (
                             <span
-                              className={`text-[10px] font-mono px-2 py-0.5 rounded-full border border-white/5 ${
+                              className={`text-[10px] font-badge px-2 py-0.5 rounded-full border border-white/5 ${
                                 item.badgeColor || "text-slate-400 bg-slate-900"
                               }`}
                             >
@@ -402,7 +403,7 @@ export function MilestonesContainer() {
 
             {/* Bottom Anchor Quote */}
             <div className="pt-3 border-t border-white/10">
-              <p className="text-[11px] text-slate-500 italic leading-relaxed text-center font-serif">
+              <p className="text-xs text-slate-400 italic leading-relaxed text-center font-subheading">
                 &ldquo;Never stray from the center reference point. This anchor is your roots.&rdquo;
               </p>
             </div>
@@ -412,7 +413,39 @@ export function MilestonesContainer() {
         {/* ========================================================
             RIGHT PANEL: Dynamic Stage & Interactive Canvas
            ======================================================== */}
-        <div className="lg:col-span-8 xl:col-span-9">
+        <div className="lg:col-span-8 xl:col-span-9 space-y-4">
+          {/* Top Quick Horizon Switcher Pills */}
+          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl overflow-x-auto scrollbar-none">
+            {[
+              { id: "daily", label: "☀️ Daily Horizon" },
+              { id: "weekly", label: "🗓️ Weekly Sprints" },
+              { id: "monthly", label: "🪐 Monthly Orbits" },
+              { id: "yearly", label: "⭐ Yearly Pillars" },
+              { id: "murakaba_review", label: "🧭 Murakaba Review" },
+              { id: "starlight_vault", label: "🏆 Starlight Vault" },
+            ].map((horizon) => {
+              const isSelected =
+                activeSection === horizon.id ||
+                (horizon.id === "daily" && activeSection === "today_sparks") ||
+                (horizon.id === "weekly" && activeSection === "weekly_sprints") ||
+                (horizon.id === "monthly" && activeSection === "monthly_orbits") ||
+                (horizon.id === "yearly" && activeSection === "yearly_horizon");
+
+              return (
+                <button
+                  key={horizon.id}
+                  onClick={() => setActiveSection(horizon.id as MilestonePanelSection)}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-badge whitespace-nowrap transition flex items-center gap-1.5 ${
+                    isSelected
+                      ? "bg-gradient-to-r from-cyan-500/25 to-indigo-600/30 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(6,182,212,0.2)] font-semibold"
+                      : "text-slate-400 hover:text-white hover:bg-white/5"
+                  }`}
+                >
+                  <span>{horizon.label}</span>
+                </button>
+              );
+            })}
+          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
@@ -421,14 +454,18 @@ export function MilestonesContainer() {
               exit={{ opacity: 0, x: -15 }}
               transition={{ duration: 0.22, ease: "easeOut" }}
             >
-              {activeSection === "today_sparks" && (
-                <TodaySparksTab
+              {(activeSection === "daily" || activeSection === "today_sparks") && (
+                <DailyHorizonDashboard
                   tasks={todayTasks}
                   weeklyGoals={weeklyGoals}
+
                   onAddTask={handleAddTask}
                   onToggleTask={handleToggleTask}
                   onDeleteTask={handleDeleteTask}
                   onCarryOverTasks={handleCarryOverTasks}
+                  dailyNote={dailyNote}
+                  onSaveNote={handleSaveNote}
+                  onNavigateToWeekly={() => setActiveSection("weekly")}
                 />
               )}
 
@@ -439,18 +476,19 @@ export function MilestonesContainer() {
                 />
               )}
 
-              {activeSection === "weekly_sprints" && (
+              {(activeSection === "weekly" || activeSection === "weekly_sprints") && (
                 <WeeklySprintsTab
                   weeklyGoals={weeklyGoals}
-                  onNavigateToToday={() => setActiveSection("today_sparks")}
+
+                  onNavigateToToday={() => setActiveSection("daily")}
                 />
               )}
 
-              {activeSection === "monthly_orbits" && (
+              {(activeSection === "monthly" || activeSection === "monthly_orbits") && (
                 <MonthlyOrbitsTab monthlyGoals={monthlyGoals} />
               )}
 
-              {activeSection === "yearly_horizon" && (
+              {(activeSection === "yearly" || activeSection === "yearly_horizon") && (
                 <YearlyHorizonTab yearlyGoals={yearlyGoals} />
               )}
 
@@ -465,6 +503,7 @@ export function MilestonesContainer() {
                 <StarlightVaultTab
                   tasks={todayTasks}
                   weeklyGoals={weeklyGoals}
+
                   monthlyGoals={monthlyGoals}
                   yearlyGoals={yearlyGoals}
                 />
