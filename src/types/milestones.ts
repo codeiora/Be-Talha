@@ -11,7 +11,8 @@ export type MilestonePanelSection =
   | "yearly"
   | "yearly_horizon"
   | "murakaba_review"
-  | "starlight_vault";
+  | "starlight_vault"
+  | "divine_constellation";
 
 export type GoalCategory = "deen" | "intellect" | "body" | "crucible" | "other";
 

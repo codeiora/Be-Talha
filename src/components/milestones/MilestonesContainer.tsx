@@ -3,16 +3,16 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Flame,
+  Anchor,
+  Compass,
+  Star,
+  Sparkles,
   BookOpen,
   Layers,
   Orbit,
-  Star,
-  Compass,
-  Award,
-  Sparkles,
-  ChevronRight,
-  ShieldCheck,
+  Telescope,
+  Eye,
+  Trophy,
   Menu,
   X,
 } from "lucide-react";
@@ -48,6 +48,7 @@ import { MonthlyOrbitsTab } from "./tabs/MonthlyOrbitsTab";
 import { YearlyHorizonTab } from "./tabs/YearlyHorizonTab";
 import { MurakabaReviewTab } from "./tabs/MurakabaReviewTab";
 import { StarlightVaultTab } from "./tabs/StarlightVaultTab";
+import { DivineConstellationTab } from "./tabs/DivineConstellationTab";
 
 interface MenuItem {
   id: MilestonePanelSection;
@@ -215,66 +216,79 @@ export function MilestonesContainer() {
 
   const pendingTodayCount = todayTasks.filter((t) => !t.completed).length;
 
-  // Sidebar Menu Groupings
+  // Sidebar Menu Groupings (The Anchor, The Horizon, The Crucible, Divine Constellation)
   const MENU_GROUPS: { groupTitle: string; items: MenuItem[] }[] = [
     {
-      groupTitle: "Core Horizon Decks (মূল দিগন্ত ড্যাশবোর্ড)",
+      groupTitle: "The Anchor (নোঙর)",
       items: [
         {
           id: "daily",
           label: "Daily Horizon",
-          bengali: "দৈনিক ড্যাশবোর্ড ও স্পার্কস",
-          icon: Flame,
+          bengali: "দৈনিক কর্মযজ্ঞ ও স্পার্কস",
+          icon: Anchor,
           badge: pendingTodayCount > 0 ? `${pendingTodayCount} left` : "Done",
-          badgeColor: pendingTodayCount > 0 ? "text-amber-300 bg-amber-500/20" : "text-emerald-300 bg-emerald-500/20",
+          badgeColor: pendingTodayCount > 0 ? "text-amber-300 bg-amber-500/20 border border-amber-400/30" : "text-emerald-300 bg-emerald-500/20 border border-emerald-400/30",
         },
         {
           id: "daily_notes",
           label: "Daily Log & Notes",
-          bengali: "আজকের বিশেষ নোট ও চিন্তা",
+          bengali: "আজকের বিশেষ চিন্তা ও নোট",
           icon: BookOpen,
         },
       ],
     },
     {
-      groupTitle: "Celestial Horizons (ভবিষ্যতের রূপরেখা)",
+      groupTitle: "The Horizon (দিগন্ত)",
       items: [
         {
           id: "weekly",
           label: "Weekly Sprints",
-          bengali: "সাপ্তাহিক স্প্রিন্ট",
+          bengali: "সাপ্তাহিক স্প্রিন্ট ও ফোকাস",
           icon: Layers,
           badge: `${weeklyGoals.length} Sprints`,
-          badgeColor: "text-indigo-300 bg-indigo-500/15",
+          badgeColor: "text-amber-300 bg-amber-500/15 border border-amber-400/30",
         },
         {
           id: "monthly",
           label: "Monthly Orbits",
-          bengali: "মাসিক মাইলস্টোন",
+          bengali: "মাসিক মাইলস্টোন ও আবর্তন",
           icon: Orbit,
         },
         {
           id: "yearly",
           label: "Yearly Pillars",
-          bengali: "বাৎসরিক দিগন্ত",
-          icon: Star,
+          bengali: "বাৎসরিক স্তম্ভ ও দূরদৃষ্টি",
+          icon: Telescope,
         },
       ],
     },
     {
-      groupTitle: "Sanctuary & Vault (আত্মশুদ্ধি ও হিস্টোরি)",
+      groupTitle: "The Crucible (ভুল থেকে শেখার জায়গা)",
       items: [
         {
           id: "murakaba_review",
           label: "Weekly Murakaba",
-          bengali: "সাপ্তাহিক পর্যালোচনা",
-          icon: Compass,
+          bengali: "সাপ্তাহিক মোরাকাবা ও পর্যালোচনা",
+          icon: Eye,
         },
         {
           id: "starlight_vault",
           label: "Starlight Vault",
-          bengali: "XP ও স্ট্রিক অ্যানালিটিক্স",
-          icon: Award,
+          bengali: "XP, স্ট্রিক ও হিস্টোরি",
+          icon: Trophy,
+        },
+      ],
+    },
+    {
+      groupTitle: "Divine Constellation (ঐশী নক্ষত্রমণ্ডল)",
+      items: [
+        {
+          id: "divine_constellation",
+          label: "Hifz & Quran Orbit",
+          bengali: "কুরআন হিফজ ও ৫টি স্তম্ভ",
+          icon: Sparkles,
+          badge: "114 Surahs",
+          badgeColor: "text-amber-300 bg-amber-500/25 border border-amber-400/40",
         },
       ],
     },
@@ -282,10 +296,10 @@ export function MilestonesContainer() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-[50vh] flex items-center justify-center text-slate-500 font-mono text-xs">
+      <div className="min-h-[50vh] flex items-center justify-center text-amber-300/60 font-mono text-xs">
         <span className="animate-pulse flex items-center gap-2">
-          <Compass className="w-4 h-4 text-cyan-400 animate-spin" />
-          Synchronizing command center...
+          <Compass className="w-4 h-4 text-amber-400 animate-spin" />
+          Synchronizing celestial command center...
         </span>
       </div>
     );
@@ -294,42 +308,43 @@ export function MilestonesContainer() {
   return (
     <div className="max-w-7xl mx-auto pb-24">
       {/* Mobile Top Toggle Bar */}
-      <div className="lg:hidden mb-4 p-3 rounded-2xl bg-slate-900/90 border border-white/10 flex items-center justify-between">
+      <div className="lg:hidden mb-4 p-3 rounded-2xl bg-slate-950/95 border border-amber-500/25 flex items-center justify-between shadow-lg">
         <div className="flex items-center gap-2 text-xs font-semibold text-white">
-          <Flame className="w-4 h-4 text-cyan-400" />
-          <span>Talha&apos;s Command Deck</span>
+          <Anchor className="w-4 h-4 text-amber-400" />
+          <span className="text-amber-200">Talha&apos;s Command Deck</span>
         </div>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white"
+          className="p-1.5 rounded-xl bg-white/5 border border-amber-500/20 text-slate-300 hover:text-white"
         >
-          {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+          {isMobileMenuOpen ? <X className="w-4 h-4 text-amber-400" /> : <Menu className="w-4 h-4 text-amber-400" />}
         </button>
       </div>
 
       {/* Main 2-Panel Layout Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ========================================================
-            LEFT PANEL: Command Deck Navigation
+            LEFT PANEL: Command Deck Navigation (Gold & Obsidian)
            ======================================================== */}
         <div
           className={`lg:col-span-4 xl:col-span-3 space-y-4 ${
             isMobileMenuOpen ? "block" : "hidden lg:block"
           }`}
         >
-          <div className="sticky top-20 rounded-3xl bg-slate-950/85 border border-cyan-500/20 p-4 sm:p-5 shadow-[0_0_40px_rgba(6,182,212,0.1)] backdrop-blur-2xl space-y-5">
+          <div className="sticky top-20 rounded-3xl bg-slate-950/90 border border-amber-500/30 p-4 sm:p-5 shadow-[0_0_40px_rgba(245,158,11,0.12),0_20px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl space-y-5">
             {/* User Profile & Momentum Header */}
-            <div className="pb-4 border-b border-white/10 flex items-center justify-between">
+            <div className="pb-4 border-b border-amber-500/20 flex items-center justify-between">
               <div className="space-y-0.5">
-                <div className="text-xs font-badge text-slate-400 flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="text-xs font-badge text-amber-400/90 flex items-center gap-1.5">
+                  <Anchor className="w-3.5 h-3.5 text-amber-400" />
                   <span>COMMAND DECK</span>
                 </div>
-                <h3 className="text-base font-heading text-white">Talha&apos;s Orbits</h3>
+                <h3 className="text-base font-heading text-white">Talha&apos;s Roots</h3>
               </div>
 
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30 text-xs font-badge">
-                <Flame className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              {/* 3D Golden Star Streak Badge */}
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/15 text-amber-300 border border-amber-400/40 text-xs font-badge shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+                <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] animate-pulse" />
                 <span>5d Streak</span>
               </div>
             </div>
@@ -338,7 +353,7 @@ export function MilestonesContainer() {
             <div className="space-y-5">
               {MENU_GROUPS.map((group, idx) => (
                 <div key={idx} className="space-y-1.5">
-                  <div className="text-xs font-subheading uppercase tracking-wider text-slate-400 px-2">
+                  <div className="text-xs font-subheading uppercase tracking-wider text-amber-400/80 px-2 font-semibold">
                     {group.groupTitle}
                   </div>
 
@@ -356,15 +371,15 @@ export function MilestonesContainer() {
                           }}
                           className={`w-full relative flex items-center justify-between p-2.5 px-3 rounded-2xl text-xs font-medium transition text-left group ${
                             isActive
-                              ? "bg-gradient-to-r from-cyan-600/30 via-indigo-600/25 to-transparent text-white border border-cyan-400/40 shadow-[0_0_20px_rgba(6,182,212,0.2)]"
-                              : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
+                              ? "bg-gradient-to-r from-amber-500/20 via-yellow-500/10 to-transparent text-amber-100 border border-amber-400/40 shadow-[0_0_25px_rgba(245,158,11,0.2)]"
+                              : "text-slate-400 hover:text-amber-200 hover:bg-amber-500/5 hover:border hover:border-amber-500/15"
                           }`}
                         >
                           {/* Active Indicator Glow Bar */}
                           {isActive && (
                             <motion.div
                               layoutId="active-deck-glow"
-                              className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]"
+                              className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-gradient-to-b from-amber-300 via-yellow-400 to-amber-500 rounded-full shadow-[0_0_12px_#f59e0b]"
                             />
                           )}
 
@@ -372,13 +387,13 @@ export function MilestonesContainer() {
                             <Icon
                               className={`w-4 h-4 flex-shrink-0 transition ${
                                 isActive
-                                  ? "text-cyan-300 drop-shadow-[0_0_6px_rgba(6,182,212,0.8)]"
-                                  : "text-slate-500 group-hover:text-slate-300"
+                                  ? "text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]"
+                                  : "text-slate-500 group-hover:text-amber-300/80"
                               }`}
                             />
                             <div className="min-w-0">
                               <div className="font-subheading font-medium truncate">{item.label}</div>
-                              <div className="text-[11px] font-bengali text-slate-400 truncate">
+                              <div className="text-[11px] font-bengali text-slate-400 group-hover:text-amber-300/60 truncate">
                                 {item.bengali}
                               </div>
                             </div>
@@ -386,8 +401,8 @@ export function MilestonesContainer() {
 
                           {item.badge && (
                             <span
-                              className={`text-[10px] font-badge px-2 py-0.5 rounded-full border border-white/5 ${
-                                item.badgeColor || "text-slate-400 bg-slate-900"
+                              className={`text-[10px] font-badge px-2 py-0.5 rounded-full ${
+                                item.badgeColor || "text-slate-400 bg-slate-900 border border-white/5"
                               }`}
                             >
                               {item.badge}
@@ -401,11 +416,14 @@ export function MilestonesContainer() {
               ))}
             </div>
 
-            {/* Bottom Anchor Quote */}
-            <div className="pt-3 border-t border-white/10">
-              <p className="text-xs text-slate-400 italic leading-relaxed text-center font-subheading">
-                &ldquo;Never stray from the center reference point. This anchor is your roots.&rdquo;
+            {/* Bottom Anchor Quote (From the Sacred Letter of Roots) */}
+            <div className="pt-3 border-t border-amber-500/20 space-y-1">
+              <p className="text-xs text-amber-200/80 italic leading-relaxed text-center font-subheading">
+                &ldquo;Never step away from the center of the circle merely to widen your circumference... This anchor point is your roots.&rdquo;
               </p>
+              <div className="text-[10px] text-amber-400/70 font-badge text-center font-semibold">
+                — চিঠির দর্শন (The Letter of Roots)
+              </div>
             </div>
           </div>
         </div>
@@ -414,38 +432,6 @@ export function MilestonesContainer() {
             RIGHT PANEL: Dynamic Stage & Interactive Canvas
            ======================================================== */}
         <div className="lg:col-span-8 xl:col-span-9 space-y-4">
-          {/* Top Quick Horizon Switcher Pills */}
-          <div className="flex items-center gap-1.5 p-1.5 rounded-2xl bg-slate-950/70 border border-white/10 backdrop-blur-xl overflow-x-auto scrollbar-none">
-            {[
-              { id: "daily", label: "☀️ Daily Horizon" },
-              { id: "weekly", label: "🗓️ Weekly Sprints" },
-              { id: "monthly", label: "🪐 Monthly Orbits" },
-              { id: "yearly", label: "⭐ Yearly Pillars" },
-              { id: "murakaba_review", label: "🧭 Murakaba Review" },
-              { id: "starlight_vault", label: "🏆 Starlight Vault" },
-            ].map((horizon) => {
-              const isSelected =
-                activeSection === horizon.id ||
-                (horizon.id === "daily" && activeSection === "today_sparks") ||
-                (horizon.id === "weekly" && activeSection === "weekly_sprints") ||
-                (horizon.id === "monthly" && activeSection === "monthly_orbits") ||
-                (horizon.id === "yearly" && activeSection === "yearly_horizon");
-
-              return (
-                <button
-                  key={horizon.id}
-                  onClick={() => setActiveSection(horizon.id as MilestonePanelSection)}
-                  className={`px-3.5 py-1.5 rounded-xl text-xs font-badge whitespace-nowrap transition flex items-center gap-1.5 ${
-                    isSelected
-                      ? "bg-gradient-to-r from-cyan-500/25 to-indigo-600/30 text-cyan-300 border border-cyan-400/40 shadow-[0_0_15px_rgba(6,182,212,0.2)] font-semibold"
-                      : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <span>{horizon.label}</span>
-                </button>
-              );
-            })}
-          </div>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeSection}
@@ -458,7 +444,6 @@ export function MilestonesContainer() {
                 <DailyHorizonDashboard
                   tasks={todayTasks}
                   weeklyGoals={weeklyGoals}
-
                   onAddTask={handleAddTask}
                   onToggleTask={handleToggleTask}
                   onDeleteTask={handleDeleteTask}
@@ -479,7 +464,6 @@ export function MilestonesContainer() {
               {(activeSection === "weekly" || activeSection === "weekly_sprints") && (
                 <WeeklySprintsTab
                   weeklyGoals={weeklyGoals}
-
                   onNavigateToToday={() => setActiveSection("daily")}
                 />
               )}
@@ -503,10 +487,13 @@ export function MilestonesContainer() {
                 <StarlightVaultTab
                   tasks={todayTasks}
                   weeklyGoals={weeklyGoals}
-
                   monthlyGoals={monthlyGoals}
                   yearlyGoals={yearlyGoals}
                 />
+              )}
+
+              {activeSection === "divine_constellation" && (
+                <DivineConstellationTab />
               )}
             </motion.div>
           </AnimatePresence>

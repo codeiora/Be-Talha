@@ -183,10 +183,10 @@ export function DailyHorizonDashboard({
       {/* ========================================================
           1. GREETING & HEADER BAR
          ======================================================== */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-950/70 border border-cyan-500/20 backdrop-blur-xl shadow-[0_12px_32px_rgba(2,6,23,0.6)]">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-3xl bg-slate-950/70 border border-amber-500/30 backdrop-blur-xl shadow-[0_0_40px_rgba(245,158,11,0.1),0_12px_32px_rgba(2,6,23,0.8)]">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-badge tracking-wider bg-cyan-500/10 text-cyan-300 border border-cyan-400/30 flex items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-badge tracking-wider bg-amber-500/15 text-amber-300 border border-amber-400/40 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
               DAILY HORIZON COMMAND
             </span>
@@ -222,7 +222,7 @@ export function DailyHorizonDashboard({
 
           <button
             onClick={() => setIsNoteModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900 border border-white/10 text-slate-300 text-xs font-badge hover:text-white hover:border-cyan-400/30 transition active:scale-95"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-900 border border-white/10 text-slate-300 text-xs font-badge hover:text-white hover:border-amber-400/30 transition active:scale-95"
           >
             <BookOpen className="w-3.5 h-3.5 text-cyan-400" />
             <span>Daily Note</span>
@@ -230,7 +230,7 @@ export function DailyHorizonDashboard({
 
           <button
             onClick={() => setIsQuickAddOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-badge text-xs transition shadow-[0_0_20px_rgba(6,182,212,0.3)] active:scale-95"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-badge text-xs font-bold transition shadow-[0_0_20px_rgba(245,158,11,0.35)] active:scale-95"
           >
             <Plus className="w-4 h-4 text-slate-950 stroke-[2.5]" />
             <span>Add Spark</span>
@@ -243,12 +243,12 @@ export function DailyHorizonDashboard({
          ======================================================== */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Sparks Completed */}
-        <div className="relative overflow-hidden p-4 rounded-3xl bg-slate-950/80 border border-cyan-500/20 backdrop-blur-xl shadow-lg hover:border-cyan-400/40 transition">
+        <div className="relative overflow-hidden p-4 rounded-3xl bg-slate-950/80 border border-amber-500/20 backdrop-blur-xl shadow-lg hover:border-amber-400/40 transition">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-subheading uppercase tracking-wider text-slate-400">
               Sparks Done
             </span>
-            <div className="w-8 h-8 rounded-xl bg-cyan-500/15 border border-cyan-400/30 flex items-center justify-center text-cyan-300">
+            <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-amber-300">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
@@ -257,7 +257,7 @@ export function DailyHorizonDashboard({
               {completedTasks}
               <span className="text-lg text-slate-500 font-subheading"> / {totalTasks}</span>
             </span>
-            <span className="text-xs font-badge text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
+            <span className="text-xs font-badge text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
               {completionRate}%
             </span>
           </div>
@@ -266,7 +266,7 @@ export function DailyHorizonDashboard({
               initial={{ width: 0 }}
               animate={{ width: `${completionRate}%` }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="h-full bg-gradient-to-r from-cyan-500 to-indigo-500 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.8)]"
+              className="h-full bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 rounded-full shadow-[0_0_8px_rgba(245,158,11,0.8)]"
             />
           </div>
         </div>
@@ -317,19 +317,19 @@ export function DailyHorizonDashboard({
         </div>
 
         {/* Card 4: Daily Momentum Streak */}
-        <div className="relative overflow-hidden p-4 rounded-3xl bg-slate-950/80 border border-emerald-500/20 backdrop-blur-xl shadow-lg hover:border-emerald-400/40 transition">
+        <div className="relative overflow-hidden p-4 rounded-3xl bg-slate-950/80 border border-amber-500/30 backdrop-blur-xl shadow-lg hover:border-amber-400/50 shadow-[0_0_20px_rgba(245,158,11,0.1)] transition">
           <div className="flex items-center justify-between mb-2">
             <span className="text-xs font-subheading uppercase tracking-wider text-slate-400">
               Momentum Streak
             </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
-              <Flame className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-300">
+              <Star className="w-4 h-4 fill-amber-400 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.9)] animate-pulse" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-3xl font-badge text-white tracking-wide">5 Days</span>
-            <span className="text-xs font-badge text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
-              Unbroken 🔥
+            <span className="text-xs font-badge text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-400/30 flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" /> Unbroken ⭐
             </span>
           </div>
           <p className="mt-2 text-xs text-slate-400 font-subheading">
@@ -343,11 +343,11 @@ export function DailyHorizonDashboard({
          ======================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================== LEFT: Smooth Bezier Curve Chart (8 cols) ================== */}
-        <div className="lg:col-span-8 p-5 rounded-3xl bg-slate-950/80 border border-cyan-500/20 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="lg:col-span-8 p-5 rounded-3xl bg-slate-950/80 border border-amber-500/20 backdrop-blur-xl shadow-xl space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-cyan-400" />
+                <TrendingUp className="w-4 h-4 text-amber-400" />
                 <h3 className="text-base font-heading text-white tracking-wide">
                   Productivity &amp; Energy Velocity
                 </h3>
@@ -365,7 +365,7 @@ export function DailyHorizonDashboard({
                 onClick={() => setChartMode("flow")}
                 className={`px-3 py-1 rounded-xl transition ${
                   chartMode === "flow"
-                    ? "bg-cyan-500 text-slate-950 font-badge shadow-sm"
+                    ? "bg-amber-500 text-slate-950 font-badge font-semibold shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -375,7 +375,7 @@ export function DailyHorizonDashboard({
                 onClick={() => setChartMode("velocity")}
                 className={`px-3 py-1 rounded-xl transition ${
                   chartMode === "velocity"
-                    ? "bg-cyan-500 text-slate-950 font-badge shadow-sm"
+                    ? "bg-amber-500 text-slate-950 font-badge font-semibold shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
@@ -387,16 +387,16 @@ export function DailyHorizonDashboard({
           {/* Interactive SVG Chart Container */}
           <div className="relative pt-4 pb-2 w-full h-[220px]">
             {/* Encouraging Speech Bubble Pill */}
-            <div className="absolute top-2 right-12 z-10 px-3.5 py-1 rounded-full bg-cyan-500/15 border border-cyan-400/30 text-cyan-300 text-xs font-subheading shadow-[0_0_15px_rgba(6,182,212,0.25)] flex items-center gap-1.5 animate-bounce">
+            <div className="absolute top-2 right-12 z-10 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-subheading shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center gap-1.5 animate-bounce">
               <span>Great rhythm, Talha! 🎯</span>
             </div>
 
             <svg viewBox="0 0 600 180" className="w-full h-full overflow-visible">
               <defs>
                 <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.45" />
-                  <stop offset="50%" stopColor="#6366f1" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.0" />
+                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.45" />
+                  <stop offset="50%" stopColor="#eab308" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
                 </linearGradient>
                 <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
                   <feGaussianBlur stdDeviation="3" result="blur" />
@@ -421,13 +421,13 @@ export function DailyHorizonDashboard({
                   <path
                     d="M 40 140 Q 140 30, 220 70 T 380 40 T 560 65"
                     fill="none"
-                    stroke="#22d3ee"
+                    stroke="#fbbf24"
                     strokeWidth="3.5"
                     filter="url(#glowEffect)"
                   />
                   {/* Interactive Nodes */}
-                  <circle cx="40" cy="140" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="140" cy="50" r="6" fill="#22d3ee" stroke="#02040a" strokeWidth="2" />
+                  <circle cx="40" cy="140" r="5" fill="#f59e0b" stroke="#02040a" strokeWidth="2" />
+                  <circle cx="140" cy="50" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
                   <circle cx="220" cy="70" r="5.5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
                   <circle cx="380" cy="40" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
                   <circle cx="560" cy="65" r="6" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
@@ -451,7 +451,7 @@ export function DailyHorizonDashboard({
                   <circle cx="120" cy="110" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
                   <circle cx="200" cy="70" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
                   <circle cx="280" cy="65" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="370" cy="35" r="6" fill="#22d3ee" stroke="#02040a" strokeWidth="2" />
+                  <circle cx="370" cy="35" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
                   <circle cx="460" cy="50" r="5" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
                   <circle cx="560" cy="35" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
                 </>
@@ -549,7 +549,7 @@ export function DailyHorizonDashboard({
                   key={dayNum}
                   className={`py-1 rounded-xl text-xs font-badge transition cursor-pointer flex items-center justify-center ${
                     isToday
-                      ? "bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-[0_0_12px_rgba(6,182,212,0.8)] scale-105"
+                      ? "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 text-slate-950 shadow-[0_0_12px_rgba(245,158,11,0.8)] scale-105 font-bold"
                       : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
@@ -563,16 +563,16 @@ export function DailyHorizonDashboard({
           <div className="pt-3 border-t border-white/10 space-y-2">
             <div className="text-[11px] font-subheading uppercase tracking-wider text-slate-400 flex items-center justify-between">
               <span>Upcoming Today</span>
-              <span className="text-cyan-400 font-badge">Fixed Anchors</span>
+              <span className="text-amber-400 font-badge">Fixed Anchors</span>
             </div>
 
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-white/5">
                 <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                  <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
                   <span className="text-slate-200 font-subheading">Subhe Sadik &amp; Hifz Amukhta</span>
                 </div>
-                <span className="text-xs font-badge text-cyan-300">Dawn</span>
+                <span className="text-xs font-badge text-amber-300">Dawn</span>
               </div>
 
               <div className="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-white/5">
@@ -661,7 +661,7 @@ export function DailyHorizonDashboard({
         </div>
 
         {/* ================== COLUMN 2: Priority Sparks Checklist (5 cols) ================== */}
-        <div className="lg:col-span-5 p-5 rounded-3xl bg-slate-950/80 border border-cyan-500/20 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="lg:col-span-5 p-5 rounded-3xl bg-slate-950/80 border border-amber-500/20 backdrop-blur-xl shadow-xl space-y-4">
           <div className="flex items-center justify-between pb-2 border-b border-white/10 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-cyan-400" />
@@ -673,7 +673,7 @@ export function DailyHorizonDashboard({
               <button
                 onClick={() => setTaskFilter("all")}
                 className={`px-2.5 py-0.5 rounded-lg transition ${
-                  taskFilter === "all" ? "bg-cyan-500 text-slate-950 font-badge" : "text-slate-400 hover:text-white"
+                  taskFilter === "all" ? "bg-amber-500 text-slate-950 font-badge font-semibold" : "text-slate-400 hover:text-white"
                 }`}
               >
                 All ({tasks.length})
@@ -681,7 +681,7 @@ export function DailyHorizonDashboard({
               <button
                 onClick={() => setTaskFilter("pending")}
                 className={`px-2.5 py-0.5 rounded-lg transition ${
-                  taskFilter === "pending" ? "bg-cyan-500 text-slate-950 font-badge" : "text-slate-400 hover:text-white"
+                  taskFilter === "pending" ? "bg-amber-500 text-slate-950 font-badge font-semibold" : "text-slate-400 hover:text-white"
                 }`}
               >
                 Pending ({pendingTasks})
@@ -689,7 +689,7 @@ export function DailyHorizonDashboard({
               <button
                 onClick={() => setTaskFilter("completed")}
                 className={`px-2.5 py-0.5 rounded-lg transition ${
-                  taskFilter === "completed" ? "bg-cyan-500 text-slate-950 font-badge" : "text-slate-400 hover:text-white"
+                  taskFilter === "completed" ? "bg-amber-500 text-slate-950 font-badge font-semibold" : "text-slate-400 hover:text-white"
                 }`}
               >
                 Done ({completedTasks})
@@ -701,7 +701,7 @@ export function DailyHorizonDashboard({
           {isQuickAddOpen ? (
             <form
               onSubmit={handleCreateTask}
-              className="p-3.5 rounded-2xl bg-slate-900/90 border border-cyan-400/40 space-y-3 shadow-lg"
+              className="p-3.5 rounded-2xl bg-slate-900/90 border border-amber-400/40 space-y-3 shadow-lg"
             >
               <input
                 type="text"
@@ -709,7 +709,7 @@ export function DailyHorizonDashboard({
                 placeholder="What is your immediate focus spark?"
                 value={newTitle}
                 onChange={(e) => setNewTitle(e.target.value)}
-                className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2 text-xs font-subheading text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition"
+                className="w-full bg-slate-950 border border-white/15 rounded-xl px-3 py-2 text-xs font-subheading text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
               />
 
               <div className="grid grid-cols-2 gap-2 text-xs">
@@ -718,7 +718,7 @@ export function DailyHorizonDashboard({
                   <select
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value as GoalCategory)}
-                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs font-subheading text-slate-200 focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs font-subheading text-slate-200 focus:outline-none focus:border-amber-400"
                   >
                     <option value="deen">Deen &amp; Hifz</option>
                     <option value="intellect">Intellect &amp; Craft</option>
@@ -733,7 +733,7 @@ export function DailyHorizonDashboard({
                   <select
                     value={newPriority}
                     onChange={(e) => setNewPriority(e.target.value as PriorityLevel)}
-                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs font-subheading text-slate-200 focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-950 border border-white/15 rounded-xl px-2.5 py-1.5 text-xs font-subheading text-slate-200 focus:outline-none focus:border-amber-400"
                   >
                     <option value="high">High Priority</option>
                     <option value="normal">Normal</option>
@@ -761,7 +761,7 @@ export function DailyHorizonDashboard({
           ) : (
             <button
               onClick={() => setIsQuickAddOpen(true)}
-              className="w-full py-2.5 rounded-2xl border border-dashed border-cyan-500/30 text-cyan-400 hover:border-cyan-400 hover:bg-cyan-500/5 text-xs font-badge flex items-center justify-center gap-1.5 transition"
+              className="w-full py-2.5 rounded-2xl border border-dashed border-amber-500/40 text-amber-400 hover:border-amber-400 hover:bg-amber-500/10 text-xs font-badge flex items-center justify-center gap-1.5 transition"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Quick Add Spark for Today</span>
@@ -778,15 +778,15 @@ export function DailyHorizonDashboard({
                   className={`group flex items-start justify-between gap-3 p-3 rounded-2xl border transition ${
                     task.completed
                       ? "bg-slate-900/40 border-white/5 opacity-60"
-                      : "bg-slate-900/80 border-white/10 hover:border-cyan-400/30"
+                      : "bg-slate-900/80 border-white/10 hover:border-amber-400/30"
                   }`}
                 >
                   <button
                     onClick={() => handleToggle(task.id, task.completed)}
-                    className="mt-0.5 text-slate-400 hover:text-cyan-400 transition flex-shrink-0"
+                    className="mt-0.5 text-slate-400 hover:text-amber-400 transition flex-shrink-0"
                   >
                     {task.completed ? (
-                      <CheckCircle2 className="w-4 h-4 text-cyan-400 fill-cyan-400/20" />
+                      <CheckCircle2 className="w-4 h-4 text-amber-400 fill-amber-400/20" />
                     ) : (
                       <Circle className="w-4 h-4 text-slate-500 hover:border-cyan-400" />
                     )}
@@ -882,7 +882,7 @@ export function DailyHorizonDashboard({
             </div>
 
             <div className="space-y-1.5">
-              <div className="text-[11px] font-badge text-cyan-400 uppercase">Core Focus:</div>
+              <div className="text-[11px] font-badge text-amber-400 uppercase">Core Focus:</div>
               <p className="text-xs font-subheading text-slate-200 line-clamp-3 leading-relaxed">
                 {dailyNote.coreFocus || "No core focus logged for today yet."}
               </p>
@@ -910,7 +910,7 @@ export function DailyHorizonDashboard({
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="w-full max-w-lg p-6 rounded-3xl bg-slate-950 border border-cyan-500/30 shadow-2xl space-y-4"
+              className="w-full max-w-lg p-6 rounded-3xl bg-slate-950 border border-amber-500/30 shadow-2xl space-y-4"
             >
               <div className="flex items-center justify-between pb-3 border-b border-white/10">
                 <div className="flex items-center gap-2">
@@ -935,7 +935,7 @@ export function DailyHorizonDashboard({
                     value={noteFocus}
                     onChange={(e) => setNoteFocus(e.target.value)}
                     placeholder="E.g., Subhe Sadik discipline without distraction..."
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-amber-400"
                   />
                 </div>
 
@@ -948,7 +948,7 @@ export function DailyHorizonDashboard({
                     value={noteAyah}
                     onChange={(e) => setNoteAyah(e.target.value)}
                     placeholder="Ayah or sacred reminder that guides today..."
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-cyan-400 resize-none"
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-amber-400 resize-none"
                   />
                 </div>
 
@@ -961,7 +961,7 @@ export function DailyHorizonDashboard({
                     value={noteShukr}
                     onChange={(e) => setNoteShukr(e.target.value)}
                     placeholder="Alhamdulillah for..."
-                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-cyan-400"
+                    className="w-full bg-slate-900 border border-white/10 rounded-xl px-3 py-2 text-xs font-subheading text-white focus:outline-none focus:border-amber-400"
                   />
                 </div>
               </div>
