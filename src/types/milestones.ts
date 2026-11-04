@@ -1,6 +1,7 @@
 export type HorizonType = "today" | "weekly" | "monthly" | "yearly";
 
 export type MilestonePanelSection =
+  | "overview"
   | "daily"
   | "today_sparks"
   | "daily_notes"

@@ -47,6 +47,7 @@ interface DailyHorizonDashboardProps {
   onCarryOverTasks: () => void;
   onSaveNote: (updated: DailyNoteEntry) => void;
   onNavigateToWeekly?: () => void;
+  onNavigateToDaily?: () => void;
 }
 
 export function DailyHorizonDashboard({
@@ -59,6 +60,7 @@ export function DailyHorizonDashboard({
   onCarryOverTasks,
   onSaveNote,
   onNavigateToWeekly,
+  onNavigateToDaily,
 }: DailyHorizonDashboardProps) {
   // Input states for new spark
   const [newTitle, setNewTitle] = useState("");
@@ -209,6 +211,17 @@ export function DailyHorizonDashboard({
 
         {/* Quick Top Actions */}
         <div className="flex items-center gap-2.5 flex-wrap">
+          {onNavigateToDaily && (
+            <button
+              onClick={onNavigateToDaily}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-badge hover:bg-amber-500/25 transition active:scale-95"
+              title="Go to dedicated Daily Tasks deck"
+            >
+              <Flame className="w-3.5 h-3.5" />
+              <span>Daily Tasks</span>
+            </button>
+          )}
+
           {uncompletedPreviousDays.length > 0 && (
             <button
               onClick={onCarryOverTasks}
@@ -668,7 +681,19 @@ export function DailyHorizonDashboard({
               <h3 className="text-base font-heading text-white">Today&apos;s Priority Sparks</h3>
             </div>
 
-            {/* Filter pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {onNavigateToDaily && (
+                <button
+                  onClick={onNavigateToDaily}
+                  className="text-xs font-badge text-amber-300 hover:text-white flex items-center gap-1 transition"
+                  title="Go to full Daily Sparks task deck"
+                >
+                  <span>Open Daily Tasks</span>
+                  <ArrowRight className="w-3 h-3" />
+                </button>
+              )}
+
+              {/* Filter pills */}
             <div className="flex items-center gap-1 text-[11px] font-badge p-0.5 rounded-xl bg-slate-900 border border-white/10">
               <button
                 onClick={() => setTaskFilter("all")}
@@ -694,6 +719,7 @@ export function DailyHorizonDashboard({
               >
                 Done ({completedTasks})
               </button>
+            </div>
             </div>
           </div>
 
