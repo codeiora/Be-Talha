@@ -72,7 +72,7 @@ export function DailyHorizonDashboard({
   const [taskFilter, setTaskFilter] = useState<"all" | "pending" | "completed">("all");
 
   // Chart view toggle state: 'flow' = today's energy curve, 'velocity' = 7-day spark trend
-  const [chartMode, setChartMode] = useState<"flow" | "velocity">("flow");
+  const [chartMode, setChartMode] = useState<"flow" | "velocity" | "monthly" | "yearly">("flow");
 
   // Mini Calendar state
   const [calendarMonth, setCalendarMonth] = useState(new Date().getMonth());
@@ -357,8 +357,8 @@ export function DailyHorizonDashboard({
          ======================================================== */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ================== LEFT: Smooth Bezier Curve Chart (8 cols) ================== */}
-        <div className="lg:col-span-8 p-5 rounded-3xl bg-slate-950/80 border border-amber-500/20 backdrop-blur-xl shadow-xl space-y-4">
-          <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="lg:col-span-8 p-5 sm:p-6 rounded-3xl bg-slate-950/80 border border-amber-500/20 backdrop-blur-xl shadow-xl space-y-4">
+          <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
               <div className="flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-amber-400" />
@@ -366,18 +366,22 @@ export function DailyHorizonDashboard({
                   Productivity &amp; Energy Velocity
                 </h3>
               </div>
-              <p className="text-xs font-subheading text-slate-400">
+              <p className="text-xs font-subheading text-slate-400 mt-0.5">
                 {chartMode === "flow"
                   ? "Today's dynamic focus rhythm across dawn, noon, afternoon & night"
-                  : "7-Day velocity of completed sparks and consistency"}
+                  : chartMode === "velocity"
+                  ? "7-Day velocity of completed sparks and consistency"
+                  : chartMode === "monthly"
+                  ? "Monthly trajectory across 4 strategic weekly sprint cycles"
+                  : "Annual horizon velocity across 4 macro quarters"}
               </p>
             </div>
 
-            {/* Mode Switcher */}
-            <div className="flex items-center p-1 rounded-2xl bg-slate-900 border border-white/10 text-xs font-badge">
+            {/* Mode Switcher: Flow, 7-Day, Monthly, Yearly */}
+            <div className="flex items-center p-1 rounded-2xl bg-slate-900 border border-white/10 text-xs font-badge flex-wrap gap-1">
               <button
                 onClick={() => setChartMode("flow")}
-                className={`px-3 py-1 rounded-xl transition ${
+                className={`px-2.5 sm:px-3 py-1 rounded-xl transition ${
                   chartMode === "flow"
                     ? "bg-amber-500 text-slate-950 font-badge font-semibold shadow-sm"
                     : "text-slate-400 hover:text-white"
@@ -387,102 +391,198 @@ export function DailyHorizonDashboard({
               </button>
               <button
                 onClick={() => setChartMode("velocity")}
-                className={`px-3 py-1 rounded-xl transition ${
+                className={`px-2.5 sm:px-3 py-1 rounded-xl transition ${
                   chartMode === "velocity"
-                    ? "bg-amber-500 text-slate-950 font-badge font-semibold shadow-sm"
+                    ? "bg-cyan-500 text-slate-950 font-badge font-semibold shadow-sm"
                     : "text-slate-400 hover:text-white"
                 }`}
               >
-                7-Day Velocity
+                7-Day
+              </button>
+              <button
+                onClick={() => setChartMode("monthly")}
+                className={`px-2.5 sm:px-3 py-1 rounded-xl transition ${
+                  chartMode === "monthly"
+                    ? "bg-emerald-500 text-slate-950 font-badge font-semibold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Monthly Orbit
+              </button>
+              <button
+                onClick={() => setChartMode("yearly")}
+                className={`px-2.5 sm:px-3 py-1 rounded-xl transition ${
+                  chartMode === "yearly"
+                    ? "bg-purple-500 text-slate-950 font-badge font-semibold shadow-sm"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                Yearly Pillars
               </button>
             </div>
           </div>
 
-          {/* Interactive SVG Chart Container */}
-          <div className="relative pt-4 pb-2 w-full h-[220px]">
-            {/* Encouraging Speech Bubble Pill */}
-            <div className="absolute top-2 right-12 z-10 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs font-subheading shadow-[0_0_15px_rgba(245,158,11,0.25)] flex items-center gap-1.5 animate-bounce">
-              <span>Great rhythm, Talha! 🎯</span>
+          {/* Interactive SVG Chart Container with Contained Labels */}
+          <div className="relative pt-2 w-full flex flex-col justify-between">
+            {/* Top Encouraging Speech Bubble Pill */}
+            <div className="flex justify-end mb-2 pr-2">
+              <div
+                className={`px-3 py-1 rounded-full border text-[11px] font-subheading flex items-center gap-1.5 transition-all ${
+                  chartMode === "flow"
+                    ? "bg-amber-500/15 border-amber-400/30 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]"
+                    : chartMode === "velocity"
+                    ? "bg-cyan-500/15 border-cyan-400/30 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)]"
+                    : chartMode === "monthly"
+                    ? "bg-emerald-500/15 border-emerald-400/30 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]"
+                    : "bg-purple-500/15 border-purple-400/30 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.25)]"
+                }`}
+              >
+                <span>
+                  {chartMode === "flow" && "Great rhythm, Talha! 🎯"}
+                  {chartMode === "velocity" && "5d Streak Maintained! 🔥"}
+                  {chartMode === "monthly" && "Monthly Velocity: 84% 🚀"}
+                  {chartMode === "yearly" && "Pillars Ascending! 🌟"}
+                </span>
+              </div>
             </div>
 
-            <svg viewBox="0 0 600 180" className="w-full h-full overflow-visible">
-              <defs>
-                <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.45" />
-                  <stop offset="50%" stopColor="#eab308" stopOpacity="0.2" />
-                  <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
-                </linearGradient>
-                <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
-                  <feGaussianBlur stdDeviation="3" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-              </defs>
+            {/* SVG Chart Graphic - explicit height wrapper */}
+            <div className="relative w-full h-40 sm:h-44">
+              <svg viewBox="0 0 600 150" className="w-full h-full" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="curveGradientGold" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity="0.45" />
+                    <stop offset="50%" stopColor="#eab308" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="curveGradientCyan" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.45" />
+                    <stop offset="50%" stopColor="#0284c7" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#0284c7" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="curveGradientEmerald" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.45" />
+                    <stop offset="50%" stopColor="#059669" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#059669" stopOpacity="0.0" />
+                  </linearGradient>
+                  <linearGradient id="curveGradientPurple" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#a855f7" stopOpacity="0.45" />
+                    <stop offset="50%" stopColor="#7c3aed" stopOpacity="0.15" />
+                    <stop offset="100%" stopColor="#7c3aed" stopOpacity="0.0" />
+                  </linearGradient>
+                  <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+                    <feGaussianBlur stdDeviation="3" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
 
-              {/* Background Grid Lines */}
-              <line x1="20" y1="30" x2="580" y2="30" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
-              <line x1="20" y1="80" x2="580" y2="80" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
-              <line x1="20" y1="130" x2="580" y2="130" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
+                {/* Background Grid Lines */}
+                <line x1="20" y1="25" x2="580" y2="25" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
+                <line x1="20" y1="65" x2="580" y2="65" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
+                <line x1="20" y1="105" x2="580" y2="105" stroke="rgba(255,255,255,0.05)" strokeDasharray="4 4" />
 
-              {/* Data Curves based on Mode */}
-              {chartMode === "flow" ? (
+                {/* Mode 1: Today's Flow */}
+                {chartMode === "flow" && (
+                  <>
+                    <path
+                      d="M 40 120 Q 140 25, 220 60 T 380 35 T 560 55 L 560 145 L 40 145 Z"
+                      fill="url(#curveGradientGold)"
+                    />
+                    <path
+                      d="M 40 120 Q 140 25, 220 60 T 380 35 T 560 55"
+                      fill="none"
+                      stroke="#fbbf24"
+                      strokeWidth="3.5"
+                      filter="url(#glowEffect)"
+                    />
+                    <circle cx="40" cy="120" r="5" fill="#f59e0b" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="140" cy="45" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="220" cy="60" r="5.5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="380" cy="35" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="560" cy="55" r="6" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
+                  </>
+                )}
+
+                {/* Mode 2: 7-Day Velocity */}
+                {chartMode === "velocity" && (
+                  <>
+                    <path
+                      d="M 40 115 C 100 95, 160 50, 230 65 S 340 30, 410 40 S 500 20, 560 25 L 560 145 L 40 145 Z"
+                      fill="url(#curveGradientCyan)"
+                    />
+                    <path
+                      d="M 40 115 C 100 95, 160 50, 230 65 S 340 30, 410 40 S 500 20, 560 25"
+                      fill="none"
+                      stroke="#38bdf8"
+                      strokeWidth="3.5"
+                      filter="url(#glowEffect)"
+                    />
+                    <circle cx="40" cy="115" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="120" cy="95" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="200" cy="60" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="280" cy="55" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="370" cy="30" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="460" cy="40" r="5" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="560" cy="25" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
+                  </>
+                )}
+
+                {/* Mode 3: Monthly Orbit */}
+                {chartMode === "monthly" && (
+                  <>
+                    <path
+                      d="M 40 100 C 120 70, 160 40, 220 45 S 330 25, 400 30 S 500 18, 560 20 L 560 145 L 40 145 Z"
+                      fill="url(#curveGradientEmerald)"
+                    />
+                    <path
+                      d="M 40 100 C 120 70, 160 40, 220 45 S 330 25, 400 30 S 500 18, 560 20"
+                      fill="none"
+                      stroke="#10b981"
+                      strokeWidth="3.5"
+                      filter="url(#glowEffect)"
+                    />
+                    <circle cx="40" cy="100" r="5.5" fill="#10b981" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="220" cy="45" r="6" fill="#34d399" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="400" cy="30" r="6.5" fill="#6ee7b7" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="560" cy="20" r="7" fill="#10b981" stroke="#02040a" strokeWidth="2" />
+                  </>
+                )}
+
+                {/* Mode 4: Yearly Pillars */}
+                {chartMode === "yearly" && (
+                  <>
+                    <path
+                      d="M 40 120 C 120 85, 160 60, 230 65 S 330 35, 400 38 S 490 18, 560 20 L 560 145 L 40 145 Z"
+                      fill="url(#curveGradientPurple)"
+                    />
+                    <path
+                      d="M 40 120 C 120 85, 160 60, 230 65 S 330 35, 400 38 S 490 18, 560 20"
+                      fill="none"
+                      stroke="#c084fc"
+                      strokeWidth="3.5"
+                      filter="url(#glowEffect)"
+                    />
+                    <circle cx="40" cy="120" r="5.5" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="230" cy="65" r="6" fill="#c084fc" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="400" cy="38" r="6.5" fill="#e879f9" stroke="#02040a" strokeWidth="2" />
+                    <circle cx="560" cy="20" r="7" fill="#c084fc" stroke="#02040a" strokeWidth="2" />
+                  </>
+                )}
+              </svg>
+            </div>
+
+            {/* X-Axis Labels - Cleanly contained inside the card with border-t */}
+            <div className="flex justify-between items-center px-3 sm:px-4 pt-3 pb-1 text-[11px] sm:text-xs font-subheading text-slate-400 border-t border-white/5 mt-2">
+              {chartMode === "flow" && (
                 <>
-                  {/* Filled Area */}
-                  <path
-                    d="M 40 140 Q 140 30, 220 70 T 380 40 T 560 65 L 560 160 L 40 160 Z"
-                    fill="url(#curveGradient)"
-                  />
-                  {/* Stroke Line */}
-                  <path
-                    d="M 40 140 Q 140 30, 220 70 T 380 40 T 560 65"
-                    fill="none"
-                    stroke="#fbbf24"
-                    strokeWidth="3.5"
-                    filter="url(#glowEffect)"
-                  />
-                  {/* Interactive Nodes */}
-                  <circle cx="40" cy="140" r="5" fill="#f59e0b" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="140" cy="50" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="220" cy="70" r="5.5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="380" cy="40" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="560" cy="65" r="6" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
-                </>
-              ) : (
-                <>
-                  {/* 7-Day Velocity Curve */}
-                  <path
-                    d="M 40 130 C 120 110, 180 60, 260 75 S 380 30, 460 50 S 530 25, 560 35 L 560 160 L 40 160 Z"
-                    fill="url(#curveGradient)"
-                  />
-                  <path
-                    d="M 40 130 C 120 110, 180 60, 260 75 S 380 30, 460 50 S 530 25, 560 35"
-                    fill="none"
-                    stroke="#38bdf8"
-                    strokeWidth="3.5"
-                    filter="url(#glowEffect)"
-                  />
-                  {/* Nodes */}
-                  <circle cx="40" cy="130" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="120" cy="110" r="5" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="200" cy="70" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="280" cy="65" r="5" fill="#818cf8" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="370" cy="35" r="6" fill="#fbbf24" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="460" cy="50" r="5" fill="#a855f7" stroke="#02040a" strokeWidth="2" />
-                  <circle cx="560" cy="35" r="7" fill="#38bdf8" stroke="#02040a" strokeWidth="2" />
+                  <span className="text-center">Fajr<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Dawn)</span></span>
+                  <span className="text-center">Dhuhr<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Noon)</span></span>
+                  <span className="text-center">Asr<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Afternoon)</span></span>
+                  <span className="text-center">Maghrib<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> &amp; Isha</span></span>
+                  <span className="text-center">Qiyam<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Night)</span></span>
                 </>
               )}
-            </svg>
-
-            {/* X-Axis Labels */}
-            <div className="flex justify-between px-6 text-xs font-subheading text-slate-400 mt-1">
-              {chartMode === "flow" ? (
-                <>
-                  <span>Fajr (Dawn)</span>
-                  <span>Dhuhr (Midday)</span>
-                  <span>Asr (Afternoon)</span>
-                  <span>Maghrib &amp; Isha</span>
-                  <span>Night Qiyam</span>
-                </>
-              ) : (
+              {chartMode === "velocity" && (
                 <>
                   <span>Mon</span>
                   <span>Tue</span>
@@ -490,7 +590,23 @@ export function DailyHorizonDashboard({
                   <span>Thu</span>
                   <span>Fri</span>
                   <span>Sat</span>
-                  <span>Sun (Today)</span>
+                  <span className="text-cyan-300 font-semibold">Sun (Today)</span>
+                </>
+              )}
+              {chartMode === "monthly" && (
+                <>
+                  <span className="text-center">Week 01<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Seed)</span></span>
+                  <span className="text-center">Week 02<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Sprint)</span></span>
+                  <span className="text-center">Week 03<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> (Momentum)</span></span>
+                  <span className="text-center text-emerald-300 font-semibold">Week 04<br className="sm:hidden" /><span className="text-[10px] text-emerald-400/80 sm:inline sm:text-emerald-300"> (Harvest)</span></span>
+                </>
+              )}
+              {chartMode === "yearly" && (
+                <>
+                  <span className="text-center">Q1<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> Foundations</span></span>
+                  <span className="text-center">Q2<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> Expansion</span></span>
+                  <span className="text-center">Q3<br className="sm:hidden" /><span className="text-[10px] text-slate-500 sm:inline sm:text-slate-400"> Mastery</span></span>
+                  <span className="text-center text-purple-300 font-semibold">Q4<br className="sm:hidden" /><span className="text-[10px] text-purple-400/80 sm:inline sm:text-purple-300"> Horizon</span></span>
                 </>
               )}
             </div>
