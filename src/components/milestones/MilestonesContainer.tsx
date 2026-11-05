@@ -242,7 +242,7 @@ export function MilestonesContainer() {
   // Sidebar Menu Groupings (The Anchor, The Horizon, The Crucible, Divine Constellation)
   const MENU_GROUPS: { groupTitle: string; items: MenuItem[] }[] = [
     {
-      groupTitle: "The Anchor (নোঙর)",
+      groupTitle: "The Anchor",
       items: [
         {
           id: "overview",
@@ -267,7 +267,7 @@ export function MilestonesContainer() {
       ],
     },
     {
-      groupTitle: "The Horizon (দিগন্ত)",
+      groupTitle: "The Horizon",
       items: [
         {
           id: "weekly",
@@ -292,7 +292,7 @@ export function MilestonesContainer() {
       ],
     },
     {
-      groupTitle: "The Crucible (ভুল থেকে শেখার জায়গা)",
+      groupTitle: "The Crucible",
       items: [
         {
           id: "murakaba_review",
@@ -309,7 +309,7 @@ export function MilestonesContainer() {
       ],
     },
     {
-      groupTitle: "Divine Constellation (ঐশী নক্ষত্রমণ্ডল)",
+      groupTitle: "Divine Constellation",
       items: [
         {
           id: "divine_constellation",
@@ -469,7 +469,7 @@ export function MilestonesContainer() {
                             setActiveSection(item.id);
                             setIsMobileMenuOpen(false);
                           }}
-                          aria-label={`${item.label} (${item.bengali})`}
+                          aria-label={item.label}
                           className={`w-full relative flex items-center transition group ${
                             isCollapsed
                               ? "lg:w-11 lg:h-11 lg:mx-auto lg:justify-center lg:p-0 lg:rounded-xl justify-between p-2.5 px-3 rounded-2xl"
@@ -493,13 +493,13 @@ export function MilestonesContainer() {
                           )}
 
                           <div
-                            className={`flex items-center gap-2.5 min-w-0 ${
+                            className={`flex items-center gap-3 min-w-0 ${
                               isCollapsed ? "lg:gap-0 lg:justify-center" : ""
                             }`}
                           >
                             <Icon
                               className={`flex-shrink-0 transition ${
-                                isCollapsed ? "w-4 h-4 lg:w-5 lg:h-5" : "w-4 h-4"
+                                isCollapsed ? "w-4.5 h-4.5 lg:w-5 lg:h-5" : "w-4.5 h-4.5"
                               } ${
                                 isActive
                                   ? "text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)]"
@@ -507,16 +507,16 @@ export function MilestonesContainer() {
                               }`}
                             />
                             <div className={`min-w-0 ${isCollapsed ? "lg:hidden" : "block"}`}>
-                              <div className="font-subheading font-medium truncate">{item.label}</div>
-                              <div className="text-[11px] font-bengali text-slate-400 group-hover:text-amber-300/60 truncate">
-                                {item.bengali}
-                              </div>
+                              <span className={`font-subheading text-[13.5px] sm:text-sm tracking-wide truncate ${isActive ? "text-amber-100 font-semibold drop-shadow-[0_0_8px_rgba(251,191,36,0.25)]" : "text-slate-200 font-medium group-hover:text-amber-200"}`}>{item.label}</span>
+
+
+
                             </div>
                           </div>
 
                           {item.badge && (
                             <span
-                              className={`text-[10px] font-badge px-2 py-0.5 rounded-full ${
+                              className={`text-[11px] font-badge px-2 py-0.5 rounded-full ml-2 flex-shrink-0 ${
                                 isCollapsed ? "lg:hidden" : "inline-block"
                               } ${
                                 item.badgeColor || "text-slate-400 bg-slate-900 border border-white/5"
@@ -545,8 +545,8 @@ export function MilestonesContainer() {
                                     {item.badge}
                                   </span>
                                 )}
+
                               </div>
-                              <span className="text-[10px] text-amber-300/80 font-bengali mt-0.5">{item.bengali}</span>
                             </div>
                           )}
                         </button>
