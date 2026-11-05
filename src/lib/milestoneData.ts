@@ -5,6 +5,8 @@ import {
   MonthlyOrbitGoal,
   YearlyHorizonGoal,
   MurakabaEntry,
+  GoalCategory,
+  PriorityLevel,
 } from "@/types/milestones";
 
 export const MILESTONES_STORAGE_KEY_TODAY = "be_talha_milestones_today_v1";
@@ -13,6 +15,99 @@ export const MILESTONES_STORAGE_KEY_WEEKLY = "be_talha_milestones_weekly_v1";
 export const MILESTONES_STORAGE_KEY_MONTHLY = "be_talha_milestones_monthly_v1";
 export const MILESTONES_STORAGE_KEY_YEARLY = "be_talha_milestones_yearly_v1";
 export const MILESTONES_STORAGE_KEY_MURAKABA = "be_talha_milestones_murakaba_v1";
+export const MILESTONES_STORAGE_KEY_BLUEPRINT = "be_talha_milestones_blueprint_v1";
+export const MILESTONES_STORAGE_KEY_ARCHIVED_XP = "be_talha_milestones_archived_xp_v1";
+export const MILESTONES_STORAGE_KEY_ARCHIVED_MINUTES = "be_talha_milestones_archived_minutes_v1";
+export const MILESTONES_STORAGE_KEY_ARCHIVED_COUNT = "be_talha_milestones_archived_count_v1";
+
+export interface BlueprintSparkItem {
+  id: string;
+  title: string;
+  category: GoalCategory;
+  priority: PriorityLevel;
+  points: number;
+  estimatedMinutes: number;
+}
+
+export const DEFAULT_DAILY_BLUEPRINT: BlueprintSparkItem[] = [
+  {
+    id: "bp-1",
+    title: "Dawn Prayer, Sunnah Adhkar & Spiritual Grounding",
+    category: "deen",
+    priority: "high",
+    points: 20,
+    estimatedMinutes: 30,
+  },
+  {
+    id: "bp-2",
+    title: "Quran Memorization — Sabaq Recitation & Precision Revision",
+    category: "deen",
+    priority: "high",
+    points: 25,
+    estimatedMinutes: 45,
+  },
+  {
+    id: "bp-3",
+    title: "Morning Routine — Grooming, Shower & Wholesome Breakfast",
+    category: "body",
+    priority: "normal",
+    points: 10,
+    estimatedMinutes: 30,
+  },
+  {
+    id: "bp-4",
+    title: "Deep Work Block 1 — Architecture & Core Systems Craft",
+    category: "intellect",
+    priority: "high",
+    points: 25,
+    estimatedMinutes: 60,
+  },
+  {
+    id: "bp-5",
+    title: "Physical Conditioning — Strength Training & Mobility",
+    category: "body",
+    priority: "normal",
+    points: 15,
+    estimatedMinutes: 40,
+  },
+  {
+    id: "bp-6",
+    title: "Evening Murakaba — Muhasaba, Reflection & Tazkiyah Check",
+    category: "tazkiyah",
+    priority: "normal",
+    points: 15,
+    estimatedMinutes: 20,
+  },
+];
+
+// Helper to clean up completed tasks older than 7 days while preserving lifetime stats
+export function cleanupOlderTasks(tasks: TodaySparkGoal[]): {
+  remainingTasks: TodaySparkGoal[];
+  archivedXP: number;
+  archivedMinutes: number;
+  archivedCount: number;
+} {
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+  const now = Date.now();
+  const remainingTasks: TodaySparkGoal[] = [];
+  let archivedXP = 0;
+  let archivedMinutes = 0;
+  let archivedCount = 0;
+
+  tasks.forEach((t) => {
+    // Only archive if completed AND older than 7 days
+    const isCompletedOld = t.completed && t.completedAt && now - t.completedAt > SEVEN_DAYS_MS;
+    if (isCompletedOld) {
+      archivedXP += t.points || 0;
+      archivedMinutes += t.actualMinutes || t.estimatedMinutes || 25;
+      archivedCount += 1;
+    } else {
+      remainingTasks.push(t);
+    }
+  });
+
+  return { remainingTasks, archivedXP, archivedMinutes, archivedCount };
+}
 
 // Helper to get formatted date string: YYYY-MM-DD
 export function getTodayDateKey(): string {
@@ -41,12 +136,18 @@ export const DEFAULT_TODAY_SPARKS: TodaySparkGoal[] = [
     category: "deen",
     priority: "high",
     points: 20,
+    estimatedMinutes: 30,
+    actualMinutes: 30,
     completed: true,
     completedAt: Date.now() - 3600000 * 3,
     createdAt: Date.now() - 3600000 * 5,
     dateKey: getTodayDateKey(),
     linkedWeeklyGoalId: "weekly-1",
     notes: "Never stray from the center reference point.",
+    subtasks: [
+      { id: "sub-1", title: "Fajr in congregation & morning adhkar", completed: true },
+      { id: "sub-2", title: "15 minutes deep Quran contemplation", completed: true },
+    ],
   },
   {
     id: "spark-2",
@@ -54,11 +155,16 @@ export const DEFAULT_TODAY_SPARKS: TodaySparkGoal[] = [
     category: "deen",
     priority: "high",
     points: 15,
+    estimatedMinutes: 45,
     completed: false,
     createdAt: Date.now() - 3600000 * 2,
     dateKey: getTodayDateKey(),
     linkedWeeklyGoalId: "weekly-1",
     notes: "Review Surah An-Nisa mutashabihaat markers.",
+    subtasks: [
+      { id: "sub-3", title: "Pages 1-5 smooth recitation", completed: false },
+      { id: "sub-4", title: "Pages 6-10 mutashabihaat check", completed: false },
+    ],
   },
   {
     id: "spark-3",
@@ -66,6 +172,7 @@ export const DEFAULT_TODAY_SPARKS: TodaySparkGoal[] = [
     category: "intellect",
     priority: "high",
     points: 20,
+    estimatedMinutes: 60,
     completed: false,
     createdAt: Date.now() - 3600000,
     dateKey: getTodayDateKey(),
@@ -77,6 +184,7 @@ export const DEFAULT_TODAY_SPARKS: TodaySparkGoal[] = [
     category: "body",
     priority: "normal",
     points: 15,
+    estimatedMinutes: 40,
     completed: false,
     createdAt: Date.now() - 1800000,
     dateKey: getTodayDateKey(),
@@ -84,24 +192,124 @@ export const DEFAULT_TODAY_SPARKS: TodaySparkGoal[] = [
   },
   {
     id: "spark-5",
-    title: "Evening Murakaba — Self-examination & Inner Crucible Check",
-    category: "crucible",
+    title: "Evening Murakaba — Self-examination & Tazkiyah Check",
+    category: "tazkiyah",
     priority: "normal",
     points: 10,
+    estimatedMinutes: 20,
     completed: false,
     createdAt: Date.now() - 900000,
     dateKey: getTodayDateKey(),
   },
 ];
 
+// Helper to format minutes to "Xh Ym" or "Xm"
+export function formatMinutes(minutes: number): string {
+  if (!minutes || minutes <= 0) return "0m";
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  if (hours === 0) return `${remainingMinutes}m`;
+  if (remainingMinutes === 0) return `${hours}h`;
+  return `${hours}h ${remainingMinutes}m`;
+}
+
+// Capacity planning status
+export interface CapacityStatus {
+  status: "optimal" | "heavy" | "overload";
+  label: string;
+  bengaliLabel: string;
+  badgeColor: string;
+  borderColor: string;
+  bgColor: string;
+  description: string;
+}
+
+export function getDailyCapacityStatus(totalMinutes: number): CapacityStatus {
+  if (totalMinutes <= 360) {
+    // Up to 6 hours: Optimal
+    return {
+      status: "optimal",
+      label: "Optimal Orbit",
+      bengaliLabel: "Optimal Balance",
+      badgeColor: "text-emerald-300",
+      borderColor: "border-emerald-400/40",
+      bgColor: "bg-emerald-500/15",
+      description: "Daily focus commitment is within a healthy, sustainable threshold.",
+    };
+  } else if (totalMinutes <= 480) {
+    // 6 - 8 hours: Heavy
+    return {
+      status: "heavy",
+      label: "Heavy Flow",
+      bengaliLabel: "High Focus Required",
+      badgeColor: "text-amber-300",
+      borderColor: "border-amber-400/40",
+      bgColor: "bg-amber-500/15",
+      description: "Demanding workload; maintain intense focus and schedule periodic breaks.",
+    };
+  } else {
+    // 8+ hours: Overload alert!
+    return {
+      status: "overload",
+      label: "Critical Capacity",
+      bengaliLabel: "Overload Alert",
+      badgeColor: "text-rose-400",
+      borderColor: "border-rose-400/50",
+      bgColor: "bg-rose-500/20",
+      description: "Planned focus exceeds 8 hours! Defer secondary sparks to weekly sprints to prevent burnout.",
+    };
+  }
+}
+
+// Helper to calculate task decay / blackhole gravity state
+export function getTaskDecayInfo(task: TodaySparkGoal) {
+  if (task.completed) {
+    return { isDecayed: false, daysPending: 0, effectivePoints: task.points };
+  }
+  const todayStr = getTodayDateKey();
+  const taskDateStr = task.dateKey || todayStr;
+  const todayTime = new Date(todayStr).getTime();
+  const taskDateTime = new Date(taskDateStr).getTime();
+  const diffTime = todayTime - taskDateTime;
+  const daysDiff = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+  const daysPending = task.daysCarriedOver !== undefined ? Math.max(task.daysCarriedOver, daysDiff) : daysDiff;
+  const isDecayed = daysPending >= 3;
+  const effectivePoints = isDecayed ? Math.max(5, Math.round(task.points * 0.5)) : task.points;
+  return { isDecayed, daysPending, effectivePoints };
+}
+
 // Default Seed for Today's Note
 export const DEFAULT_DAILY_NOTE: DailyNoteEntry = {
   id: "note-today",
   dateKey: getTodayDateKey(),
   coreFocus: "Anchor the mind in Subhe Sadik; allow no trivial distraction to fracture deep work.",
-  ayahReminder: "“And whoever fears Allah - He will make for him a way out, and will provide for him from where he does not expect.” (Surah At-Talaq: 2-3)",
-  thoughts: "The universe honors relentless discipline over momentary bursts of passion. Keep moving one stone at a time.",
-  shukr: "Alhamdulillah for another breath of life, the ability to memorize the Quran, and the health to strive for mastery.",
+  stateOfHeart: "clear_sky",
+  spiritualAnchor: "হে আল্লাহ! আমার অন্তরকে আপনার আনুগত্যে অবিচল রাখুন, আজকের কাজকর্মে বরকত দান করুন এবং আমাকে নফসের অনিষ্ট থেকে রক্ষা করুন।",
+  realityCheckStatus: "achieved",
+  realityCheckNotes: "আজকের মূল লক্ষ্য সফলভাবে অর্জিত হয়েছে, দুপুরের দিকে সামান্য ক্লান্তি এসেছিল কিন্তু তা কাটিয়ে ওঠা সম্ভব হয়েছে।",
+  theEclipse: "আসর পরবর্তী ২০ মিনিট অযথা নোটিফিকেশন চেক করে সময় অপচয় হয়েছে। কাল থেকে এই সময়ে ফোন দূরে রাখব।",
+  tomorrowsOrbit: "সকাল ৬টায় কোনো স্ক্রিন নয়, কেবল কুরআন তিলাওয়াত ও গভীর ভাবনায় দিন শুরু করব।",
+  ayahReminder: "“And whoever relies upon Allah - then He is sufficient for him. Indeed, Allah will accomplish His purpose.”",
+  ayahSource: "Surah At-Talaq: 3",
+  shukr: "ফজরের জামাত, কুরআনের সান্নিধ্য এবং সুস্থ মস্তিষ্কে কাজ করতে পারার মহান নিয়ামতের জন্য শুকরিয়া।",
+  shukrParticles: [
+    {
+      id: "shukr-seed-1",
+      text: "ফজরের জামাতে শামিল হতে পারার মহান নিয়ামত।",
+      createdAt: Date.now() - 3600000 * 8,
+    },
+    {
+      id: "shukr-seed-2",
+      text: "সুস্থ মস্তিষ্ক ও গভীর মনোযোগে কুরআন হিফজ করার তাওফীক।",
+      createdAt: Date.now() - 3600000 * 4,
+    },
+    {
+      id: "shukr-seed-3",
+      text: "একটি পরিচ্ছন্ন ও শান্ত কর্মপরিবেশ পাওয়ার কৃতজ্ঞতা।",
+      createdAt: Date.now() - 3600000 * 2,
+    },
+  ],
+  thoughts: "",
   updatedAt: Date.now(),
 };
 

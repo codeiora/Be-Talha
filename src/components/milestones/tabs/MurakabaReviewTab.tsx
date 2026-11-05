@@ -67,7 +67,7 @@ export function MurakabaReviewTab({
               </span>
             </div>
             <h2 className="text-xl sm:text-2xl font-bold font-heading text-white flex items-center gap-2">
-              Weekly Murakaba Review (সাপ্তাহিক মুরাকাবা)
+              Weekly Murakaba Review
             </h2>
             <p className="text-xs sm:text-sm text-slate-400">
               Hold yourself accountable before you are held to account.

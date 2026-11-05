@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
 import {
   Plus,
   Trash2,
@@ -13,6 +13,18 @@ import {
   RotateCcw,
   Layers,
   Star,
+  Play,
+  Anchor,
+  Clock,
+  AlertTriangle,
+  ChevronDown,
+  ChevronUp,
+  X,
+  Compass,
+  Gauge,
+  Zap,
+  GripVertical,
+  Settings,
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import {
@@ -21,8 +33,21 @@ import {
   PriorityLevel,
   CATEGORY_MAP,
   WeeklySprintGoal,
+  SubTask,
 } from "@/types/milestones";
-import { playMilestoneChime, getTodayDateKey } from "@/lib/milestoneData";
+import {
+  playMilestoneChime,
+  getTodayDateKey,
+  getTaskDecayInfo,
+  formatMinutes,
+  getDailyCapacityStatus,
+  BlueprintSparkItem,
+  DEFAULT_DAILY_BLUEPRINT,
+  MILESTONES_STORAGE_KEY_BLUEPRINT,
+} from "@/lib/milestoneData";
+import { DeepWorkOrbitModal } from "../modals/DeepWorkOrbitModal";
+import { SupernovaRewardOverlay } from "../modals/SupernovaRewardOverlay";
+import { ManageBlueprintModal } from "../modals/ManageBlueprintModal";
 
 interface TodaySparksTabProps {
   tasks: TodaySparkGoal[];
@@ -31,6 +56,8 @@ interface TodaySparksTabProps {
   onToggleTask: (id: string) => void;
   onDeleteTask: (id: string) => void;
   onCarryOverTasks: () => void;
+  onUpdateTask?: (updatedTask: TodaySparkGoal) => void;
+  onReorderTasks?: (newTasks: TodaySparkGoal[]) => void;
 }
 
 export function TodaySparksTab({
@@ -40,14 +67,105 @@ export function TodaySparksTab({
   onToggleTask,
   onDeleteTask,
   onCarryOverTasks,
+  onUpdateTask,
+  onReorderTasks,
 }: TodaySparksTabProps) {
+  // Input bar state
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<GoalCategory>("deen");
   const [priority, setPriority] = useState<PriorityLevel>("high");
   const [points, setPoints] = useState<number>(15);
+  const [estimatedMinutes, setEstimatedMinutes] = useState<number>(25);
   const [linkedWeeklyGoalId, setLinkedWeeklyGoalId] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "pending" | "completed">("all");
-  const [isAddingOpen, setIsAddingOpen] = useState(false);
+  const [isInputExpanded, setIsInputExpanded] = useState(false);
+
+  // Blueprint routine state
+  const [blueprint, setBlueprint] = useState<BlueprintSparkItem[]>(DEFAULT_DAILY_BLUEPRINT);
+  const [isBlueprintModalOpen, setIsBlueprintModalOpen] = useState(false);
+
+  // Subtask local inputs state (map of taskId -> string)
+  const [subtaskInputs, setSubtaskInputs] = useState<Record<string, string>>({});
+  const [expandedSubtasks, setExpandedSubtasks] = useState<Record<string, boolean>>({});
+
+  // Deep Work Focus Modal state
+  const [focusTask, setFocusTask] = useState<TodaySparkGoal | null>(null);
+
+  // Supernova Celebration state
+  const [supernovaTask, setSupernovaTask] = useState<TodaySparkGoal | null>(null);
+  const [supernovaPoints, setSupernovaPoints] = useState<number>(0);
+
+  // Load custom blueprint from localStorage
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(MILESTONES_STORAGE_KEY_BLUEPRINT);
+      if (stored) {
+        const parsed: BlueprintSparkItem[] = JSON.parse(stored);
+        const LEGACY_MAP: Record<string, string> = {
+          "ফজর সালাত, মাসনুন দুআ ও আত্মিক সূচনা": "Dawn Prayer, Sunnah Adhkar & Spiritual Grounding",
+          "কুরআন মুখস্থ ও পুনরাবৃত্তি (সবক ও রিভিশন)": "Quran Memorization — Sabaq Recitation & Precision Revision",
+          "সকালের প্রাতরাশ, গোসল ও ফ্রেশ হওয়া": "Morning Routine — Grooming, Shower & Wholesome Breakfast",
+          "ডিপ ওয়ার্ক পর্ব ১ — কোর সিস্টেম ও কোডিং": "Deep Work Block 1 — Architecture & Core Systems Craft",
+          "ডিপ ওয়ার্ক পর্ব ১ — কোর সিস্টেম ও কোডিং": "Deep Work Block 1 — Architecture & Core Systems Craft",
+          "জোহর সালাত ও মধ্যাহ্ন বিরতি": "Dhuhr Prayer & Mindful Nourishment Break",
+          "ব্যায়াম, হাঁটা অথবা শরীরচর্চা": "Physical Discipline — Calisthenics or Outdoor Run",
+          "সান্ধ্যকালীন হিসেব-নিকেশ ও আত্মশুদ্ধি": "Evening Murakaba, Accountability & Soul Alignment",
+        };
+        const sanitized = parsed.map((bp) => ({
+          ...bp,
+          title: LEGACY_MAP[bp.title] || bp.title,
+        }));
+        setBlueprint(sanitized);
+        localStorage.setItem(MILESTONES_STORAGE_KEY_BLUEPRINT, JSON.stringify(sanitized));
+      } else {
+        localStorage.setItem(MILESTONES_STORAGE_KEY_BLUEPRINT, JSON.stringify(DEFAULT_DAILY_BLUEPRINT));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
+
+  const handleSaveBlueprint = (updated: BlueprintSparkItem[]) => {
+    setBlueprint(updated);
+    try {
+      localStorage.setItem(MILESTONES_STORAGE_KEY_BLUEPRINT, JSON.stringify(updated));
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // 1-Click Load Blueprint into Today's Tasks
+  const handleLoadBlueprint = () => {
+    const existingTitles = new Set(tasks.map((t) => t.title.toLowerCase().trim()));
+    const itemsToAdd = blueprint.filter(
+      (bp) => !existingTitles.has(bp.title.toLowerCase().trim())
+    );
+
+    if (itemsToAdd.length === 0) {
+      alert("All routine blueprint habits are already active in today's orbit!");
+      return;
+    }
+
+    itemsToAdd.forEach((bp) => {
+      onAddTask({
+        title: bp.title,
+        category: bp.category,
+        priority: bp.priority,
+        points: bp.points,
+        estimatedMinutes: bp.estimatedMinutes,
+        completed: false,
+        subtasks: [],
+      });
+    });
+
+    playMilestoneChime(true);
+    confetti({
+      particleCount: 45,
+      spread: 75,
+      origin: { y: 0.7 },
+      colors: ["#fbbf24", "#38bdf8", "#34d399", "#f43f5e"],
+    });
+  };
 
   const todayKey = getTodayDateKey();
 
@@ -63,15 +181,26 @@ export function TodaySparksTab({
     return true;
   });
 
+  // Calculate today's points earned
   const totalPointsEarned = tasks
     .filter((t) => t.completed)
-    .reduce((acc, t) => acc + (t.points || 0), 0);
+    .reduce((acc, t) => {
+      const decay = getTaskDecayInfo(t);
+      return acc + (decay.effectivePoints || t.points || 0);
+    }, 0);
 
-  const totalPossiblePoints = tasks.reduce((acc, t) => acc + (t.points || 0), 0);
   const completedCount = tasks.filter((t) => t.completed).length;
   const pendingCount = tasks.length - completedCount;
   const progressPercent = tasks.length > 0 ? Math.round((completedCount / tasks.length) * 100) : 0;
 
+  // Time & Capacity Planning calculations
+  const totalPlannedMinutes = tasks.reduce((acc, t) => acc + (t.estimatedMinutes || 25), 0);
+  const completedPlannedMinutes = tasks
+    .filter((t) => t.completed)
+    .reduce((acc, t) => acc + (t.actualMinutes || t.estimatedMinutes || 25), 0);
+  const capacity = getDailyCapacityStatus(totalPlannedMinutes);
+
+  // Add spark
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
@@ -81,120 +210,450 @@ export function TodaySparksTab({
       category,
       priority,
       points,
+      estimatedMinutes,
       completed: false,
       linkedWeeklyGoalId: linkedWeeklyGoalId || undefined,
+      subtasks: [],
     });
 
     setTitle("");
-    setIsAddingOpen(false);
+    setIsInputExpanded(false);
   };
 
-  const handleToggle = (id: string, currentStatus: boolean) => {
-    onToggleTask(id);
-    if (!currentStatus) {
-      playMilestoneChime(true);
-      confetti({
-        particleCount: 28,
-        spread: 55,
-        origin: { y: 0.75 },
-        colors: ["#fbbf24", "#f59e0b", "#38bdf8", "#34d399"],
+  // Toggle completion with Supernova celebration on High-priority
+  const handleToggle = (task: TodaySparkGoal, actualMin?: number) => {
+    const currentStatus = task.completed;
+    
+    // If actual minutes passed from focus mode, update task
+    if (actualMin && onUpdateTask && !currentStatus) {
+      onUpdateTask({
+        ...task,
+        actualMinutes: actualMin,
+        completed: true,
+        completedAt: Date.now(),
       });
+    } else {
+      onToggleTask(task.id);
+    }
+
+    if (!currentStatus) {
+      const decay = getTaskDecayInfo(task);
+      const pointsToAward = decay.effectivePoints;
+
+      if (task.priority === "high") {
+        playMilestoneChime(true);
+        setSupernovaTask(task);
+        setSupernovaPoints(pointsToAward);
+      } else {
+        playMilestoneChime(true);
+        confetti({
+          particleCount: 35,
+          spread: 60,
+          origin: { y: 0.75 },
+          colors: ["#fbbf24", "#f59e0b", "#38bdf8", "#34d399"],
+        });
+      }
     } else {
       playMilestoneChime(false);
     }
   };
 
-  return (
-    <div className="space-y-6 pb-12">
-      {/* 1. Header Progress & Stats Card */}
-      <div className="relative overflow-hidden rounded-3xl bg-slate-950/80 border border-amber-500/30 p-5 sm:p-6 shadow-[0_0_35px_rgba(245,158,11,0.1),0_12px_32px_rgba(2,6,23,0.8)] backdrop-blur-xl">
-        <div className="absolute top-0 right-0 -mt-10 -mr-10 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-badge tracking-wider bg-amber-500/15 text-amber-300 border border-amber-400/40 flex items-center gap-1.5">
-                <Flame className="w-3.5 h-3.5 text-amber-400" />
-                DAILY SPARKS &amp; TASKS
-              </span>
-              <span className="text-xs font-subheading text-slate-400">
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-heading text-white flex items-center gap-2 tracking-wide">
-              Today&apos;s Focus Sparks
-              <span className="text-slate-400 text-sm font-subheading font-normal">
-                ({completedCount}/{tasks.length} Completed)
-              </span>
-            </h1>
-            <p className="text-xs sm:text-sm font-subheading text-slate-300">
-              Conquer today&apos;s non-negotiable sparks to fuel your cosmic momentum and spiritual ascent.
+  // Subtask handlers
+  const handleToggleSubtask = (taskId: string, subtaskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || !onUpdateTask) return;
+    const subtasks = task.subtasks || [];
+    const updated = subtasks.map((s) => (s.id === subtaskId ? { ...s, completed: !s.completed } : s));
+    onUpdateTask({ ...task, subtasks: updated });
+  };
+
+  const handleAddSubtask = (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    const subTitle = (subtaskInputs[taskId] || "").trim();
+    if (!task || !subTitle || !onUpdateTask) return;
+
+    const newSub: SubTask = {
+      id: `sub-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      title: subTitle,
+      completed: false,
+    };
+    const updated = [...(task.subtasks || []), newSub];
+    onUpdateTask({ ...task, subtasks: updated });
+    setSubtaskInputs((prev) => ({ ...prev, [taskId]: "" }));
+  };
+
+  const handleDeleteSubtask = (taskId: string, subtaskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task || !onUpdateTask) return;
+    const updated = (task.subtasks || []).filter((s) => s.id !== subtaskId);
+    onUpdateTask({ ...task, subtasks: updated });
+  };
+
+  const toggleSubtaskExpand = (taskId: string) => {
+    setExpandedSubtasks((prev) => ({ ...prev, [taskId]: !prev[taskId] }));
+  };
+
+  // Helper to render structured 2-line task row: Line 1 for full title & actions, Line 2 for badges
+  const renderTaskCardContent = (task: TodaySparkGoal, isDragEnabled: boolean = false) => {
+    const catMeta = CATEGORY_MAP[task.category] || CATEGORY_MAP.other;
+    const linkedWeekly = weeklyGoals.find((w) => w.id === task.linkedWeeklyGoalId);
+    const decay = getTaskDecayInfo(task);
+    const isSubtasksOpen = !!expandedSubtasks[task.id];
+    const subtasks = task.subtasks || [];
+    const completedSubCount = subtasks.filter((s) => s.completed).length;
+
+    return (
+      <div
+        className={`group relative overflow-hidden rounded-2xl border transition-all duration-200 px-3.5 py-3 sm:px-4 sm:py-3 space-y-1.5 ${
+          task.completed
+            ? "bg-slate-950/50 border-white/5 text-slate-400 opacity-65"
+            : decay.isDecayed
+            ? "bg-gradient-to-r from-purple-950/30 via-slate-950 to-slate-950/90 border-purple-500/40 shadow-[0_0_20px_rgba(147,51,234,0.18)] text-slate-100"
+            : "bg-slate-950/80 border-amber-500/20 hover:border-amber-400/40 text-slate-100 shadow-sm hover:shadow-[0_0_20px_rgba(245,158,11,0.08)]"
+        }`}
+      >
+        {/* Line 1: Grip + Checkbox + FULL TITLE + Right Actions */}
+        <div className="flex items-start sm:items-center justify-between gap-3 min-w-0">
+          {/* Left: Grip Handle + Checkbox + Full Title */}
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3 flex-1 min-w-0">
+            {/* Drag Grip Handle */}
+            {isDragEnabled && (
+              <div
+                className="mt-0.5 sm:mt-0 text-slate-600 group-hover:text-amber-400 cursor-grab active:cursor-grabbing transition flex-shrink-0"
+                title="Drag to reorder"
+              >
+                <GripVertical className="w-4 h-4" />
+              </div>
+            )}
+
+            {/* Complete Checkbox */}
+            <button
+              onClick={() => handleToggle(task)}
+              className="mt-0.5 sm:mt-0 flex-shrink-0 transition transform active:scale-90"
+              aria-label={task.completed ? "Mark incomplete" : "Mark complete"}
+            >
+              {task.completed ? (
+                <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 text-amber-400 fill-amber-400/20 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+              ) : (
+                <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-slate-500 group-hover:text-amber-400 transition" />
+              )}
+            </button>
+
+            {/* Full Task Title - No aggressive truncate */}
+            <p
+              className={`text-xs sm:text-sm md:text-[15px] font-subheading font-medium leading-snug break-words flex-1 min-w-0 ${
+                task.completed ? "line-through text-slate-500" : "text-white"
+              }`}
+            >
+              {task.title}
             </p>
           </div>
 
-          <div className="flex items-center gap-4 sm:gap-6 bg-slate-900/80 border border-amber-500/20 rounded-2xl p-3.5 px-5 shadow-inner">
-            <div>
-              <div className="text-[11px] font-subheading text-slate-400 uppercase tracking-wider">
-                Cosmic XP Earned
-              </div>
-              <div className="text-xl font-badge text-amber-300 flex items-center gap-1.5">
-                <Star className="w-4 h-4 text-amber-400 fill-amber-400/30 animate-pulse" />
-                {totalPointsEarned} <span className="text-xs font-subheading text-slate-500">/ {totalPossiblePoints} max</span>
-              </div>
-            </div>
+          {/* Right Side Actions: Focus, XP, Subtask, Delete */}
+          <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+            {!task.completed && (
+              <button
+                onClick={() => setFocusTask(task)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-xl bg-amber-500/15 border border-amber-400/35 hover:bg-amber-500/25 text-amber-300 text-xs font-badge transition shadow-sm active:scale-95"
+                title={`Start Deep Work Focus (${task.estimatedMinutes || 25}m auto-synced)`}
+              >
+                <Play className="w-2.5 h-2.5 fill-amber-300 text-amber-300" />
+                <span className="text-[11px] font-semibold">Focus</span>
+              </button>
+            )}
 
-            <div className="w-[1px] h-10 bg-amber-500/20" />
+            {/* XP Badge */}
+            <span
+              className={`text-xs font-badge font-semibold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl border ${
+                task.completed
+                  ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                  : decay.isDecayed
+                  ? "bg-purple-900/30 text-purple-200 border-purple-500/40 line-through-subtle"
+                  : "bg-amber-500/15 text-amber-300 border-amber-400/30"
+              }`}
+              title={decay.isDecayed ? `Base XP: ${task.points}, Decayed XP: ${decay.effectivePoints}` : undefined}
+            >
+              +{decay.effectivePoints} XP
+            </span>
 
-            <div>
-              <div className="text-[11px] font-subheading text-slate-400 uppercase tracking-wider">
-                Day Progress
-              </div>
-              <div className="text-xl font-badge text-emerald-300">
-                {progressPercent}%
-              </div>
-            </div>
+            {/* Subtasks expand toggle */}
+            <button
+              onClick={() => toggleSubtaskExpand(task.id)}
+              className={`p-1 sm:p-1.5 rounded-xl border transition ${
+                isSubtasksOpen || subtasks.length > 0
+                  ? "bg-slate-800 border-white/10 text-amber-300"
+                  : "text-slate-500 hover:text-white border-transparent"
+              }`}
+              title="Toggle Sub-tasks"
+            >
+              <span className="text-[10px] font-badge mr-0.5">
+                {subtasks.length > 0 ? `${completedSubCount}/${subtasks.length}` : "+"}
+              </span>
+              {isSubtasksOpen ? <ChevronUp className="w-3.5 h-3.5 inline" /> : <ChevronDown className="w-3.5 h-3.5 inline" />}
+            </button>
+
+            {/* Delete button */}
+            <button
+              onClick={() => onDeleteTask(task.id)}
+              className="p-1 sm:p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition opacity-60 group-hover:opacity-100"
+              aria-label="Delete spark"
+              title="Delete spark"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mt-5 relative w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-white/5">
-          <motion.div
-            className="absolute top-0 left-0 bottom-0 bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-600 rounded-full shadow-[0_0_12px_rgba(245,158,11,0.8)]"
-            initial={{ width: 0 }}
-            animate={{ width: `${progressPercent}%` }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-          />
+        {/* Line 2: Clean, Minimalist Metadata (Icons & Subtle Typography — No Bulky Pills) */}
+        <div className="flex flex-wrap items-center gap-3 pl-6 sm:pl-7 text-xs">
+          {/* Category: Clean colored dot + short name */}
+          <span
+            className={`inline-flex items-center gap-1.5 text-xs font-medium ${catMeta.color}`}
+            title={`Domain: ${catMeta.label}`}
+          >
+            <span className={`w-1.5 h-1.5 rounded-full ${catMeta.dotColor || "bg-current"}`} />
+            <span>{catMeta.label.split(" ")[0]}</span>
+          </span>
+
+          {/* Priority: Just the glowing flame icon with tooltip */}
+          {task.priority === "high" && (
+            <span
+              className="inline-flex items-center text-rose-400 cursor-help"
+              title="High Focus Priority"
+            >
+              <Flame className="w-3.5 h-3.5 fill-rose-400/20 text-rose-400 animate-pulse" />
+            </span>
+          )}
+
+          {/* Estimated Duration: Clock icon + minutes */}
+          <span
+            className="inline-flex items-center gap-1 text-[11px] font-mono text-slate-400"
+            title={`Estimated duration: ${task.estimatedMinutes || 25} minutes`}
+          >
+            <Clock className="w-3 h-3 text-slate-500" />
+            <span>{task.estimatedMinutes || 25}m</span>
+          </span>
+
+          {/* Carried Over: Just the icon with tooltip */}
+          {task.isCarriedOver && !decay.isDecayed && (
+            <span
+              className="inline-flex items-center text-amber-400/80 cursor-help"
+              title="Carried over from yesterday"
+            >
+              <RotateCcw className="w-3 h-3" />
+            </span>
+          )}
+
+          {/* Blackhole Decay Alert: Compact icon + -50% */}
+          {decay.isDecayed && !task.completed && (
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-mono text-purple-400 cursor-help"
+              title={`Pending ${decay.daysPending}+ days! Sinking into the blackhole — complete now to salvage XP.`}
+            >
+              <Compass className="w-3 h-3 text-purple-400 animate-spin-slow" />
+              <span>-50% XP</span>
+            </span>
+          )}
+
+          {/* Linked Weekly Sprint: Muted breadcrumb link (no heavy border) */}
+          {linkedWeekly && (
+            <span
+              className="hidden sm:inline-flex items-center gap-1 text-[11px] text-slate-400/70 hover:text-slate-300 transition truncate max-w-[220px]"
+              title={`Linked Sprint: ${linkedWeekly.title}`}
+            >
+              <Layers className="w-3 h-3 text-slate-500" />
+              <span className="truncate">{linkedWeekly.title}</span>
+            </span>
+          )}
+        </div>
+
+        {/* Sub-tasks Expandable Section */}
+        <AnimatePresence>
+          {isSubtasksOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              className="pt-2.5 mt-2.5 border-t border-white/5 space-y-2 pl-6 sm:pl-9"
+            >
+              {/* Sub-tasks list */}
+              {subtasks.length > 0 && (
+                <div className="space-y-1">
+                  {subtasks.map((sub) => (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between gap-2 p-1.5 rounded-lg bg-slate-900/60 border border-white/5 hover:border-white/10 transition"
+                    >
+                      <button
+                        onClick={() => handleToggleSubtask(task.id, sub.id)}
+                        className="flex items-center gap-2 text-left flex-1 min-w-0"
+                      >
+                        {sub.completed ? (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                        ) : (
+                          <Circle className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                        )}
+                        <span
+                          className={`text-xs font-subheading truncate ${
+                            sub.completed ? "line-through text-slate-500" : "text-slate-200"
+                          }`}
+                        >
+                          {sub.title}
+                        </span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteSubtask(task.id, sub.id)}
+                        className="p-0.5 text-slate-500 hover:text-rose-400 transition"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add new subtask input */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={subtaskInputs[task.id] || ""}
+                  onChange={(e) =>
+                    setSubtaskInputs((prev) => ({ ...prev, [task.id]: e.target.value }))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddSubtask(task.id);
+                    }
+                  }}
+                  placeholder="+ Add subtask (e.g. Part 1 done, review)..."
+                  className="flex-1 px-3 py-1 rounded-xl bg-slate-900/90 border border-white/10 text-xs font-subheading text-slate-200 placeholder-slate-500 focus:outline-none focus:border-amber-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddSubtask(task.id)}
+                  disabled={!(subtaskInputs[task.id] || "").trim()}
+                  className="px-3 py-1 rounded-xl text-xs font-badge font-semibold bg-amber-500/20 text-amber-300 border border-amber-400/30 hover:bg-amber-500/30 disabled:opacity-40 transition"
+                >
+                  Add
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6 pb-12">
+      {/* ========================================================
+          1. CLEAN FLOATING HEADER & CAPACITY MONITOR
+         ======================================================== */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 p-4 sm:p-5 rounded-3xl bg-slate-950/80 border border-amber-500/25 shadow-[0_0_35px_rgba(245,158,11,0.08)] backdrop-blur-xl">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-badge tracking-wider bg-amber-500/15 text-amber-300 border border-amber-400/40 flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              DAILY SPARKS • THE ANCHOR
+            </span>
+            <span className="text-xs font-subheading text-slate-400">
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "short",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </div>
+          <h1 className="text-xl sm:text-2xl font-heading text-white tracking-wide">
+            Today&apos;s Active Orbit
+          </h1>
+        </div>
+
+        {/* Floating Minimal Today Metrics: XP, Tasks & Capacity Time */}
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          {/* XP Badge */}
+          <div className="px-3 py-1.5 rounded-2xl bg-slate-900/90 border border-amber-500/30 flex items-center gap-2 text-xs font-badge shadow-sm">
+            <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30 animate-pulse" />
+            <span className="text-slate-300">Earned Today:</span>
+            <span className="text-amber-300 font-bold">+{totalPointsEarned} XP</span>
+          </div>
+
+          {/* Tasks Count */}
+          <div className="px-3 py-1.5 rounded-2xl bg-slate-900/90 border border-emerald-500/30 flex items-center gap-2 text-xs font-badge shadow-sm">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="text-emerald-300 font-bold">
+              {completedCount}/{tasks.length} ({progressPercent}%)
+            </span>
+          </div>
+
+          {/* Time Budget & Capacity Status Pill */}
+          <div
+            className={`px-3 py-1.5 rounded-2xl ${capacity.bgColor} border ${capacity.borderColor} flex items-center gap-2 text-xs font-badge shadow-sm`}
+            title={capacity.description}
+          >
+            <Clock className={`w-3.5 h-3.5 ${capacity.badgeColor}`} />
+            <span className="text-slate-300">Budget:</span>
+            <span className={`${capacity.badgeColor} font-bold font-mono`}>
+              {formatMinutes(completedPlannedMinutes)} / {formatMinutes(totalPlannedMinutes)}
+            </span>
+            <span className={`text-[10px] px-1.5 py-0.5 rounded-md ${capacity.badgeColor} bg-slate-950/60 font-semibold border ${capacity.borderColor}`}>
+              {capacity.label}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 2. Unfinished Tasks Rollover Banner (If previous days exist) */}
+      {/* ========================================================
+          CAPACITY OVERLOAD ALERT (PREVENT BURNOUT)
+         ======================================================== */}
+      {capacity.status === "overload" && (
+        <motion.div
+          initial={{ opacity: 0, y: -6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-3 p-4 rounded-3xl bg-rose-500/15 border border-rose-400/40 text-rose-200 backdrop-blur-md shadow-lg"
+        >
+          <div className="p-2 rounded-2xl bg-rose-500/20 text-rose-300 flex-shrink-0 mt-0.5">
+            <AlertTriangle className="w-5 h-5 text-rose-400 animate-pulse" />
+          </div>
+          <div className="space-y-1">
+            <div className="text-sm font-subheading font-bold text-rose-200 flex items-center gap-2">
+              <span>⚠️ Energy Capacity Alert — High Overload Risk ({formatMinutes(totalPlannedMinutes)})</span>
+            </div>
+            <p className="text-xs font-subheading text-rose-200/90 leading-relaxed">
+              Your planned focus time exceeds healthy daily cognitive capacity (8+ hours). Consider deferring secondary sparks to tomorrow or weekly sprints to prevent burnout.
+            </p>
+          </div>
+        </motion.div>
+      )}
+
+      {/* ========================================================
+          2. UNFINISHED TASKS ROLLOVER & DECAY NOTICE
+         ======================================================== */}
       {uncompletedPreviousDays.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: -8 }}
+          initial={{ opacity: 0, y: -6 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-3xl bg-amber-500/10 border border-amber-400/30 text-amber-200 backdrop-blur-md shadow-lg"
         >
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-2xl bg-amber-500/20 text-amber-300">
-              <RotateCcw className="w-4 h-4" />
+              <RotateCcw className="w-4 h-4 animate-spin-slow" />
             </div>
             <div>
               <div className="text-sm font-subheading font-semibold text-amber-200">
                 {uncompletedPreviousDays.length} unfinished spark{uncompletedPreviousDays.length > 1 ? "s" : ""} from previous days
               </div>
               <div className="text-xs font-subheading text-amber-300/80">
-                Keep your momentum alive by rolling them over into today&apos;s orbit.
+                Roll them into today&apos;s orbit to keep your streak alive. Sparks pending 3+ days begin Blackhole Decay.
               </div>
             </div>
           </div>
 
           <button
             onClick={onCarryOverTasks}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-badge bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-95 whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl text-xs font-badge font-bold bg-amber-400 text-slate-950 hover:bg-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-95 whitespace-nowrap"
           >
             <span>Carry Over to Today</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -202,9 +661,184 @@ export function TodaySparksTab({
         </motion.div>
       )}
 
-      {/* 3. Action Bar: Filter & Add Task Button */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        {/* Filter Pills */}
+      {/* ========================================================
+          3. TASK INPUT BAR WITH 1-CLICK BLUEPRINT LOADER
+         ======================================================== */}
+      <div className="rounded-3xl bg-slate-950/90 border border-amber-500/30 p-4 sm:p-5 shadow-[0_0_30px_rgba(245,158,11,0.1)] backdrop-blur-xl space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                onFocus={() => setIsInputExpanded(true)}
+                placeholder="Enter new spark or focus objective (e.g. 10 pages Amukhta, Tazkiyah check)..."
+                className="w-full px-4 py-3 rounded-2xl bg-slate-900 border border-white/15 text-white placeholder-slate-500 text-sm font-subheading focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/40 transition shadow-inner"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+              <button
+                type="submit"
+                disabled={!title.trim()}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-xs font-badge font-bold text-slate-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 hover:from-amber-300 hover:to-yellow-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(245,158,11,0.3)] transition active:scale-95 whitespace-nowrap flex-1 sm:flex-initial"
+              >
+                <Plus className="w-4 h-4 stroke-[2.5]" />
+                <span>Ignite Spark</span>
+              </button>
+
+              {/* 1-Click Load Routine Blueprint Button */}
+              <button
+                type="button"
+                onClick={handleLoadBlueprint}
+                className="inline-flex items-center justify-center gap-1.5 px-3.5 py-3 rounded-2xl text-xs font-badge font-semibold text-amber-200 bg-amber-500/15 border border-amber-400/30 hover:bg-amber-500/25 shadow-sm transition active:scale-95 whitespace-nowrap"
+                title="Load routine habits (Prayer, Quran, Workout, Study) in one click"
+              >
+                <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/20" />
+                <span className="hidden sm:inline">Load Routine</span>
+                <span className="sm:hidden">Routine</span>
+              </button>
+
+              {/* Edit Blueprint Settings Button */}
+              <button
+                type="button"
+                onClick={() => setIsBlueprintModalOpen(true)}
+                className="p-3 rounded-2xl bg-slate-900 border border-white/10 text-slate-400 hover:text-white hover:border-amber-400/40 transition"
+                title="Manage routine habits blueprint"
+              >
+                <Settings className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Config Row (Category pills with Tazkiyah, Priority, Time Duration, Points) */}
+          <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+            {/* Category Selector with Tazkiyah */}
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="text-[11px] font-badge text-slate-400 uppercase mr-1">Category:</span>
+              {(["deen", "intellect", "body", "tazkiyah", "other"] as GoalCategory[]).map((catKey) => {
+                const meta = CATEGORY_MAP[catKey];
+                const isSelected = category === catKey;
+                return (
+                  <button
+                    key={catKey}
+                    type="button"
+                    onClick={() => setCategory(catKey)}
+                    className={`px-2.5 py-1 rounded-xl text-xs font-subheading border transition flex items-center gap-1.5 ${
+                      isSelected
+                        ? `${meta.bgLight} ${meta.borderColor} ${meta.color} font-semibold ring-1 ring-amber-400/40`
+                        : "bg-slate-900/80 border-white/5 text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${meta.dotColor}`} />
+                    <span>{meta.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Time Duration, Priority & Points Controls */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Estimated Time Selector (First Planning) */}
+              <div className="flex items-center bg-slate-900 border border-white/10 rounded-xl p-0.5 text-xs font-mono">
+                <span className="px-2 text-[10px] text-cyan-400 font-badge flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Time:
+                </span>
+                {[15, 25, 45, 60, 90].map((mins) => (
+                  <button
+                    key={mins}
+                    type="button"
+                    onClick={() => setEstimatedMinutes(mins)}
+                    className={`px-2 py-1 rounded-lg transition ${
+                      estimatedMinutes === mins
+                        ? "bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-400/40"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    {mins}m
+                  </button>
+                ))}
+              </div>
+
+              {/* Priority */}
+              <div className="flex items-center bg-slate-900 border border-white/10 rounded-xl p-0.5 text-xs font-badge">
+                <button
+                  type="button"
+                  onClick={() => setPriority("high")}
+                  className={`px-2.5 py-1 rounded-lg transition flex items-center gap-1 ${
+                    priority === "high"
+                      ? "bg-rose-500/20 text-rose-300 font-bold border border-rose-400/40"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <Flame className="w-3 h-3 text-rose-400" />
+                  <span>High</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPriority("normal")}
+                  className={`px-2.5 py-1 rounded-lg transition ${
+                    priority === "normal"
+                      ? "bg-amber-500/20 text-amber-300 font-bold border border-amber-400/40"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  Normal
+                </button>
+              </div>
+
+              {/* Points */}
+              <div className="flex items-center bg-slate-900 border border-white/10 rounded-xl p-0.5 text-xs font-badge">
+                {[10, 15, 20, 25].map((pts) => (
+                  <button
+                    key={pts}
+                    type="button"
+                    onClick={() => setPoints(pts)}
+                    className={`px-2 py-1 rounded-lg transition ${
+                      points === pts
+                        ? "bg-amber-500/20 text-amber-300 font-bold border border-amber-400/40"
+                        : "text-slate-400 hover:text-white"
+                    }`}
+                  >
+                    +{pts}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Optional Linked Weekly Sprint Selector (shown when input expanded) */}
+          {isInputExpanded && weeklyGoals.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              className="pt-2 border-t border-white/5"
+            >
+              <label className="block text-[11px] font-subheading text-slate-400 mb-1">
+                Link to Weekly Sprint Goal (Optional):
+              </label>
+              <select
+                value={linkedWeeklyGoalId}
+                onChange={(e) => setLinkedWeeklyGoalId(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-white/10 text-xs font-subheading text-slate-300 focus:outline-none focus:border-amber-400"
+              >
+                <option value="">-- Standalone spark (no sprint link) --</option>
+                {weeklyGoals.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    [{CATEGORY_MAP[w.category]?.label || w.category}] {w.title}
+                  </option>
+                ))}
+              </select>
+            </motion.div>
+          )}
+        </form>
+      </div>
+
+      {/* ========================================================
+          4. FILTER TABS & DRAG NOTICE
+         ======================================================== */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-1 p-1 rounded-2xl bg-slate-950/80 border border-amber-500/20 w-fit">
           <button
             onClick={() => setFilter("all")}
@@ -238,319 +872,102 @@ export function TodaySparksTab({
           </button>
         </div>
 
-        {/* Add Spark Toggle */}
-        <button
-          onClick={() => setIsAddingOpen(!isAddingOpen)}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl text-xs font-badge text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 shadow-[0_0_20px_rgba(245,158,11,0.3)] transition active:scale-95"
-        >
-          <Plus className="w-4 h-4 stroke-[2.5]" />
-          <span>{isAddingOpen ? "Close Spark Form" : "Ignite New Spark"}</span>
-        </button>
+        <div className="text-xs font-subheading text-slate-400 flex items-center gap-1.5">
+          <GripVertical className="w-3.5 h-3.5 text-amber-400/80" />
+          <span>Drag &amp; drop cards to reorder your daily sequence</span>
+        </div>
       </div>
 
-      {/* 4. Add Spark Modal / Inline Form */}
-      <AnimatePresence>
-        {isAddingOpen && (
-          <motion.form
-            initial={{ opacity: 0, height: 0, scale: 0.98 }}
-            animate={{ opacity: 1, height: "auto", scale: 1 }}
-            exit={{ opacity: 0, height: 0, scale: 0.98 }}
-            transition={{ duration: 0.25 }}
-            onSubmit={handleSubmit}
-            className="overflow-hidden rounded-3xl bg-slate-950/95 border border-amber-500/40 p-5 sm:p-6 shadow-[0_0_40px_rgba(245,158,11,0.15)] space-y-4"
-          >
-            <div className="flex items-center justify-between border-b border-amber-500/20 pb-3">
-              <h3 className="text-base font-heading text-white flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
-                Define Today&apos;s Non-Negotiable Spark
-              </h3>
-              <span className="text-xs font-badge text-amber-300 bg-amber-500/10 border border-amber-400/30 px-2.5 py-0.5 rounded-full">
-                New Daily Focus
-              </span>
-            </div>
-
-            {/* Title Input */}
-            <div>
-              <label className="block text-xs font-subheading text-slate-300 mb-1.5 uppercase tracking-wider">
-                Spark Title / Objective
-              </label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="e.g. Subhe Sadik reflection, 5 pages Amukhta revision, Next.js optimization..."
-                className="w-full px-4 py-3 rounded-2xl bg-slate-900 border border-white/15 text-white placeholder-slate-500 text-sm font-subheading focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400/50 transition"
-                autoFocus
-              />
-            </div>
-
-            {/* Category Selector */}
-            <div>
-              <label className="block text-xs font-subheading text-slate-300 mb-1.5 uppercase tracking-wider">
-                Life Domain Category
-              </label>
-              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {(Object.keys(CATEGORY_MAP) as GoalCategory[]).map((catKey) => {
-                  const meta = CATEGORY_MAP[catKey];
-                  const isSelected = category === catKey;
-                  return (
-                    <button
-                      key={catKey}
-                      type="button"
-                      onClick={() => setCategory(catKey)}
-                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-subheading border transition ${
-                        isSelected
-                          ? `${meta.bgLight} ${meta.borderColor} ${meta.color} font-semibold ring-1 ring-amber-400/40`
-                          : "bg-slate-900 border-white/5 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
-                      }`}
-                    >
-                      <span className={`w-2 h-2 rounded-full ${meta.dotColor}`} />
-                      <span className="truncate">{meta.label}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Priority & Points Row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Priority */}
-              <div>
-                <label className="block text-xs font-subheading text-slate-300 mb-1.5 uppercase tracking-wider">
-                  Priority Weight
-                </label>
-                <div className="flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPriority("high")}
-                    className={`flex-1 py-2 rounded-xl text-xs font-badge border transition flex items-center justify-center gap-1.5 ${
-                      priority === "high"
-                        ? "bg-rose-500/20 border-rose-400/40 text-rose-300 font-bold"
-                        : "bg-slate-900 border-white/5 text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    <Flame className="w-3.5 h-3.5 text-rose-400" />
-                    High Focus
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPriority("normal")}
-                    className={`flex-1 py-2 rounded-xl text-xs font-badge border transition flex items-center justify-center gap-1.5 ${
-                      priority === "normal"
-                        ? "bg-amber-500/20 border-amber-400/40 text-amber-300 font-bold"
-                        : "bg-slate-900 border-white/5 text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    ⚡ Normal
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setPriority("low")}
-                    className={`flex-1 py-2 rounded-xl text-xs font-badge border transition flex items-center justify-center gap-1.5 ${
-                      priority === "low"
-                        ? "bg-emerald-500/20 border-emerald-400/40 text-emerald-300 font-bold"
-                        : "bg-slate-900 border-white/5 text-slate-400 hover:text-white"
-                    }`}
-                  >
-                    🌿 Low
-                  </button>
-                </div>
-              </div>
-
-              {/* XP Value */}
-              <div>
-                <label className="block text-xs font-subheading text-slate-300 mb-1.5 uppercase tracking-wider">
-                  Cosmic XP Bounty
-                </label>
-                <div className="flex gap-2">
-                  {[10, 15, 20, 25].map((pts) => (
-                    <button
-                      key={pts}
-                      type="button"
-                      onClick={() => setPoints(pts)}
-                      className={`flex-1 py-2 rounded-xl text-xs font-badge border transition ${
-                        points === pts
-                          ? "bg-amber-500/20 border-amber-400/40 text-amber-300 font-bold"
-                          : "bg-slate-900 border-white/5 text-slate-400 hover:text-white"
-                      }`}
-                    >
-                      +{pts} XP
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Optional Weekly Goal Link */}
-            {weeklyGoals.length > 0 && (
-              <div>
-                <label className="block text-xs font-subheading text-slate-300 mb-1.5 uppercase tracking-wider">
-                  Connect to Weekly Sprint Goal (Optional)
-                </label>
-                <select
-                  value={linkedWeeklyGoalId}
-                  onChange={(e) => setLinkedWeeklyGoalId(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-2xl bg-slate-900 border border-white/15 text-slate-200 text-xs font-subheading focus:outline-none focus:border-amber-400"
-                >
-                  <option value="">-- No weekly sprint link (standalone) --</option>
-                  {weeklyGoals.map((w) => (
-                    <option key={w.id} value={w.id}>
-                      [{CATEGORY_MAP[w.category]?.label || w.category}] {w.title}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
-
-            {/* Submit and Cancel Buttons */}
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsAddingOpen(false)}
-                className="px-4 py-2 rounded-xl text-xs font-subheading text-slate-400 hover:text-white hover:bg-white/5 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!title.trim()}
-                className="px-5 py-2.5 rounded-xl text-xs font-badge text-slate-950 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(245,158,11,0.3)] transition active:scale-95"
-              >
-                Ignite Spark
-              </button>
-            </div>
-          </motion.form>
-        )}
-      </AnimatePresence>
-
-      {/* 5. Tasks List */}
-      <div className="space-y-3">
-        {filteredTasks.length === 0 ? (
-          <div className="py-14 px-6 rounded-3xl bg-slate-950/70 border border-amber-500/20 text-center flex flex-col items-center justify-center space-y-3 backdrop-blur-xl">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-amber-300">
-              <Sparkles className="w-6 h-6" />
-            </div>
-            <div className="text-base font-heading text-slate-300">
-              {filter === "completed"
-                ? "No completed sparks yet today."
-                : filter === "pending"
-                ? "All sparks are conquered! Glorious work."
-                : "No sparks set for today."}
-            </div>
-            <p className="text-xs font-subheading text-slate-400 max-w-sm">
-              Click &quot;Ignite New Spark&quot; above to add your non-negotiable commitments for today.
-            </p>
+      {/* ========================================================
+          5. ACTIVE ORBIT: REORDERABLE TASK LIST (DRAG & DROP)
+         ======================================================== */}
+      {filteredTasks.length === 0 ? (
+        <div className="py-14 px-6 rounded-3xl bg-slate-950/70 border border-amber-500/20 text-center flex flex-col items-center justify-center space-y-3 backdrop-blur-xl">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-400/20 flex items-center justify-center text-amber-300">
+            <Sparkles className="w-6 h-6" />
           </div>
-        ) : (
-          filteredTasks.map((task) => {
-            const catMeta = CATEGORY_MAP[task.category] || CATEGORY_MAP.other;
-            const linkedWeekly = weeklyGoals.find((w) => w.id === task.linkedWeeklyGoalId);
+          <div className="text-base font-heading text-slate-300">
+            {filter === "completed"
+              ? "No sparks completed yet today."
+              : filter === "pending"
+              ? "All sparks completed! Glorious momentum!"
+              : "No sparks planned for today."}
+          </div>
+          <p className="text-xs font-subheading text-slate-400 max-w-sm">
+            Click &quot;Load Routine&quot; above to seed your daily habits with one tap.
+          </p>
+        </div>
+      ) : filter === "all" ? (
+        /* Full Reorderable Drag & Drop List when in 'all' view */
+        <Reorder.Group
+          axis="y"
+          values={tasks}
+          onReorder={(newOrder) => {
+            if (onReorderTasks) onReorderTasks(newOrder);
+          }}
+          className="space-y-2"
+        >
+          {tasks.map((task) => (
+            <Reorder.Item
+              key={task.id}
+              value={task}
+              className="cursor-default select-none"
+            >
+              {renderTaskCardContent(task, true)}
+            </Reorder.Item>
+          ))}
+        </Reorder.Group>
+      ) : (
+        /* Filtered view list (Pending or Completed) */
+        <div className="space-y-2">
+          {filteredTasks.map((task) => (
+            <div key={task.id}>
+              {renderTaskCardContent(task, false)}
+            </div>
+          ))}
+        </div>
+      )}
 
-            return (
-              <motion.div
-                key={task.id}
-                layout
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className={`group relative overflow-hidden rounded-2xl border transition-all duration-200 p-4 sm:p-5 flex items-start sm:items-center justify-between gap-4 ${
-                  task.completed
-                    ? "bg-slate-950/60 border-amber-500/10 text-slate-400 opacity-70"
-                    : "bg-slate-950/80 border-amber-500/20 hover:border-amber-400/50 text-slate-100 shadow-md hover:shadow-[0_0_25px_rgba(245,158,11,0.1)]"
-                }`}
-              >
-                {/* Checkbox & Content */}
-                <div className="flex items-start sm:items-center gap-3.5 flex-1 min-w-0">
-                  <button
-                    onClick={() => handleToggle(task.id, task.completed)}
-                    className="mt-0.5 sm:mt-0 flex-shrink-0 transition transform active:scale-90"
-                    aria-label={task.completed ? "Mark incomplete" : "Mark complete"}
-                  >
-                    {task.completed ? (
-                      <CheckCircle2 className="w-5 h-5 text-amber-400 fill-amber-400/20 drop-shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
-                    ) : (
-                      <Circle className="w-5 h-5 text-slate-500 group-hover:text-amber-400 transition" />
-                    )}
-                  </button>
-
-                  <div className="space-y-1.5 min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span
-                        className={`text-[11px] font-badge px-2.5 py-0.5 rounded-full border ${catMeta.bgLight} ${catMeta.color} ${catMeta.borderColor}`}
-                      >
-                        {catMeta.label}
-                      </span>
-
-                      {task.priority === "high" && (
-                        <span className="text-[10px] font-badge px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-300 border border-rose-400/30 flex items-center gap-1">
-                          <Flame className="w-3 h-3 text-rose-400" />
-                          High
-                        </span>
-                      )}
-
-                      {task.isCarriedOver && (
-                        <span className="text-[10px] font-badge px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-400/30 flex items-center gap-1">
-                          <RotateCcw className="w-2.5 h-2.5" />
-                          Carried Over
-                        </span>
-                      )}
-
-                      {linkedWeekly && (
-                        <span className="text-[10px] font-badge px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-300 border border-indigo-400/30 flex items-center gap-1 truncate max-w-[200px]">
-                          <Layers className="w-2.5 h-2.5" />
-                          {linkedWeekly.title}
-                        </span>
-                      )}
-                    </div>
-
-                    <p
-                      className={`text-sm sm:text-base font-subheading font-medium break-words leading-relaxed ${
-                        task.completed ? "line-through text-slate-500" : "text-white"
-                      }`}
-                    >
-                      {task.title}
-                    </p>
-
-                    {task.notes && (
-                      <p className="text-xs text-slate-400 font-subheading italic">
-                        {task.notes}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                {/* Right Side: XP & Delete */}
-                <div className="flex items-center gap-3 flex-shrink-0">
-                  <span
-                    className={`text-xs font-badge px-2.5 py-1 rounded-xl border ${
-                      task.completed
-                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
-                        : "bg-amber-500/15 text-amber-300 border-amber-400/30"
-                    }`}
-                  >
-                    +{task.points} XP
-                  </span>
-
-                  <button
-                    onClick={() => onDeleteTask(task.id)}
-                    className="p-1.5 rounded-xl text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                    aria-label="Delete spark"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.div>
-            );
-          })
-        )}
-      </div>
-
-      {/* 6. Inspirational Cosmic Anchor Footer */}
+      {/* ========================================================
+          6. INSPIRATIONAL ANCHOR FOOTER
+         ======================================================== */}
       <div className="p-4 rounded-3xl bg-slate-950/60 border border-amber-500/20 text-center">
         <p className="text-xs text-amber-200/80 font-subheading italic">
           &ldquo;Never stray from the center reference point. Conquer the moment, and the cosmos will yield.&rdquo;
         </p>
       </div>
+
+      {/* ========================================================
+          7. MODALS: DEEP WORK ORBIT, SUPERNOVA & BLUEPRINT
+         ======================================================== */}
+      {focusTask && (
+        <DeepWorkOrbitModal
+          task={focusTask}
+          isOpen={!!focusTask}
+          onClose={() => setFocusTask(null)}
+          onCompleteTask={(taskId, actualMin) => {
+            const t = tasks.find((item) => item.id === taskId);
+            if (t) handleToggle(t, actualMin);
+          }}
+          onToggleSubtask={handleToggleSubtask}
+          onAddSubtask={handleAddSubtask}
+        />
+      )}
+
+      {supernovaTask && (
+        <SupernovaRewardOverlay
+          task={supernovaTask}
+          pointsAwarded={supernovaPoints}
+          onClose={() => setSupernovaTask(null)}
+        />
+      )}
+
+      <ManageBlueprintModal
+        isOpen={isBlueprintModalOpen}
+        onClose={() => setIsBlueprintModalOpen(false)}
+        blueprint={blueprint}
+        onSaveBlueprint={handleSaveBlueprint}
+      />
     </div>
   );
 }

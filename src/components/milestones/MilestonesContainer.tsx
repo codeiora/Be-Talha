@@ -36,6 +36,10 @@ import {
   MILESTONES_STORAGE_KEY_MONTHLY,
   MILESTONES_STORAGE_KEY_YEARLY,
   MILESTONES_STORAGE_KEY_MURAKABA,
+  MILESTONES_STORAGE_KEY_ARCHIVED_XP,
+  MILESTONES_STORAGE_KEY_ARCHIVED_MINUTES,
+  MILESTONES_STORAGE_KEY_ARCHIVED_COUNT,
+  cleanupOlderTasks,
   DEFAULT_TODAY_SPARKS,
   DEFAULT_DAILY_NOTE,
   DEFAULT_WEEKLY_SPRINTS,
@@ -57,7 +61,6 @@ import { DivineConstellationTab } from "./tabs/DivineConstellationTab";
 interface MenuItem {
   id: MilestonePanelSection;
   label: string;
-  bengali: string;
   icon: React.ElementType;
   badge?: string | number;
   badgeColor?: string;
@@ -82,7 +85,36 @@ export function MilestonesContainer() {
     try {
       const storedToday = localStorage.getItem(MILESTONES_STORAGE_KEY_TODAY);
       if (storedToday) {
-        setTodayTasks(JSON.parse(storedToday));
+        const parsed: TodaySparkGoal[] = JSON.parse(storedToday);
+        // Seamlessly migrate any legacy Bengali task titles to clean English
+        const LEGACY_TITLE_MIGRATION: Record<string, string> = {
+          "সান্ধ্যকালীন আত্মপর্যালোচনা, মুহাসাবা ও তাজকিয়াহ": "Evening Murakaba — Self-examination & Tazkiyah Check",
+          "সান্ধ্যকালীন আত্মপর্যালোচনা, মুহাসাবা ও তাজকিয়াহ": "Evening Murakaba — Self-examination & Tazkiyah Check",
+          "সুবহে সাদিক — সালাতুল ফজর ও গভীর কুরআন তিলাওয়াত": "Subhe Sadik — Dawn Prayer & Sacred Quran Contemplation",
+          "সুবহে সাদিক — সালাতুল ফজর ও গভীর কুরআন তিলাওয়াত": "Subhe Sadik — Dawn Prayer & Sacred Quran Contemplation",
+          "কুরআন রিভিশন — ১০ পৃষ্ঠা আমুক্তা নিখুঁত দাওর": "Quran Revision — 10 Pages Amukhta Precision Flow",
+          "ডিপ ওয়ার্ক — মাস্টার সিস্টেমস আর্কিটেকচার ও কমান্ড হাব": "Deep Work — Master Systems Architecture & Command Center",
+          "ডিপ ওয়ার্ক — মাস্টার সিস্টেমস আর্কিটেকচার ও কমান্ড হাব": "Deep Work — Master Systems Architecture & Command Center",
+          "শরীরচর্চা ও শক্তি সাধনা — স্ট্রেংথ ও মোবিলিটি ড্রিল": "Physical Mastery — Strength Conditioning & Mobility",
+        };
+        const sanitized = parsed.map((t) => ({
+          ...t,
+          title: LEGACY_TITLE_MIGRATION[t.title] || t.title,
+        }));
+        const { remainingTasks, archivedXP, archivedMinutes, archivedCount } = cleanupOlderTasks(sanitized);
+        if (archivedCount > 0) {
+          const prevArchivedXP = Number(localStorage.getItem(MILESTONES_STORAGE_KEY_ARCHIVED_XP) || "0");
+          const prevArchivedMin = Number(localStorage.getItem(MILESTONES_STORAGE_KEY_ARCHIVED_MINUTES) || "0");
+          const prevArchivedCnt = Number(localStorage.getItem(MILESTONES_STORAGE_KEY_ARCHIVED_COUNT) || "0");
+          localStorage.setItem(MILESTONES_STORAGE_KEY_ARCHIVED_XP, String(prevArchivedXP + archivedXP));
+          localStorage.setItem(MILESTONES_STORAGE_KEY_ARCHIVED_MINUTES, String(prevArchivedMin + archivedMinutes));
+          localStorage.setItem(MILESTONES_STORAGE_KEY_ARCHIVED_COUNT, String(prevArchivedCnt + archivedCount));
+          localStorage.setItem(MILESTONES_STORAGE_KEY_TODAY, JSON.stringify(remainingTasks));
+          setTodayTasks(remainingTasks);
+        } else {
+          setTodayTasks(sanitized);
+          localStorage.setItem(MILESTONES_STORAGE_KEY_TODAY, JSON.stringify(sanitized));
+        }
       } else {
         setTodayTasks(DEFAULT_TODAY_SPARKS);
         localStorage.setItem(MILESTONES_STORAGE_KEY_TODAY, JSON.stringify(DEFAULT_TODAY_SPARKS));
@@ -204,11 +236,23 @@ export function MilestonesContainer() {
           ...t,
           dateKey: todayKey,
           isCarriedOver: true,
+          daysCarriedOver: (t.daysCarriedOver || 0) + 1,
         };
       }
       return t;
     });
     saveTodayTasks(updated);
+  };
+
+  // Update spark (e.g. subtasks)
+  const handleUpdateTask = (updatedTask: TodaySparkGoal) => {
+    const updated = todayTasks.map((t) => (t.id === updatedTask.id ? updatedTask : t));
+    saveTodayTasks(updated);
+  };
+
+  // Reorder sparks (drag & drop)
+  const handleReorderTasks = (newTasks: TodaySparkGoal[]) => {
+    saveTodayTasks(newTasks);
   };
 
   // Save Daily Note
@@ -247,22 +291,19 @@ export function MilestonesContainer() {
         {
           id: "overview",
           label: "Horizon Overview",
-          bengali: "মহাজাগতিক ওভারভিউ ও ডেক",
-          icon: LayoutDashboard,
+                    icon: LayoutDashboard,
         },
         {
           id: "daily",
           label: "Daily Sparks",
-          bengali: "দৈনিক কর্মযজ্ঞ ও স্পার্কস",
-          icon: Flame,
+                    icon: Flame,
           badge: pendingTodayCount > 0 ? `${pendingTodayCount} left` : "Done",
           badgeColor: pendingTodayCount > 0 ? "text-amber-300 bg-amber-500/20 border border-amber-400/30" : "text-emerald-300 bg-emerald-500/20 border border-emerald-400/30",
         },
         {
           id: "daily_notes",
           label: "Daily Log & Notes",
-          bengali: "আজকের বিশেষ চিন্তা ও নোট",
-          icon: BookOpen,
+                    icon: BookOpen,
         },
       ],
     },
@@ -272,22 +313,19 @@ export function MilestonesContainer() {
         {
           id: "weekly",
           label: "Weekly Sprints",
-          bengali: "সাপ্তাহিক স্প্রিন্ট ও ফোকাস",
-          icon: Layers,
+                    icon: Layers,
           badge: `${weeklyGoals.length} Sprints`,
           badgeColor: "text-amber-300 bg-amber-500/15 border border-amber-400/30",
         },
         {
           id: "monthly",
           label: "Monthly Orbits",
-          bengali: "মাসিক মাইলস্টোন ও আবর্তন",
-          icon: Orbit,
+                    icon: Orbit,
         },
         {
           id: "yearly",
           label: "Yearly Pillars",
-          bengali: "বাৎসরিক স্তম্ভ ও দূরদৃষ্টি",
-          icon: Telescope,
+                    icon: Telescope,
         },
       ],
     },
@@ -297,14 +335,12 @@ export function MilestonesContainer() {
         {
           id: "murakaba_review",
           label: "Weekly Murakaba",
-          bengali: "সাপ্তাহিক মোরাকাবা ও পর্যালোচনা",
-          icon: Eye,
+                    icon: Eye,
         },
         {
           id: "starlight_vault",
           label: "Starlight Vault",
-          bengali: "XP, স্ট্রিক ও হিস্টোরি",
-          icon: Trophy,
+                    icon: Trophy,
         },
       ],
     },
@@ -314,8 +350,7 @@ export function MilestonesContainer() {
         {
           id: "divine_constellation",
           label: "Hifz & Quran Orbit",
-          bengali: "কুরআন হিফজ ও ৫টি স্তম্ভ",
-          icon: Sparkles,
+                    icon: Sparkles,
           badge: "114 Surahs",
           badgeColor: "text-amber-300 bg-amber-500/25 border border-amber-400/40",
         },
@@ -356,14 +391,18 @@ export function MilestonesContainer() {
             LEFT PANEL: Command Deck Navigation (Gold & Obsidian)
            ======================================================== */}
         <div
-          className={`transition-[width] duration-300 ease-in-out w-full flex-shrink-0 space-y-4 ${
+          className={`transition-[width] duration-300 ease-in-out w-full flex-shrink-0 lg:sticky lg:top-6 lg:self-start z-20 ${
             isCollapsed ? "lg:w-20" : "lg:w-80 xl:w-96"
           } ${isMobileMenuOpen ? "block" : "hidden lg:block"}`}
         >
           <div
-            className={`sticky top-20 z-20 rounded-3xl bg-slate-950/90 border border-amber-500/30 shadow-[0_0_40px_rgba(245,158,11,0.12),0_20px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-300 ${
+            className={`rounded-3xl bg-slate-950/90 border border-amber-500/30 shadow-[0_0_40px_rgba(245,158,11,0.12),0_20px_40px_rgba(0,0,0,0.8)] backdrop-blur-2xl transition-all duration-300 max-h-[calc(100vh-3rem)] overflow-y-auto ${
               isCollapsed ? "p-3 sm:p-3 lg:space-y-4 space-y-5" : "p-4 sm:p-5 space-y-5"
             }`}
+            style={{
+              scrollbarWidth: "thin",
+              scrollbarColor: "rgba(245, 158, 11, 0.25) transparent",
+            }}
           >
             {/* User Profile & Momentum Header */}
             {isCollapsed ? (
@@ -374,7 +413,7 @@ export function MilestonesContainer() {
                     type="button"
                     onClick={toggleCollapse}
                     className="w-10 h-10 rounded-xl flex items-center justify-center text-amber-300 bg-amber-500/15 hover:bg-amber-500/30 border border-amber-400/40 shadow-[0_0_15px_rgba(245,158,11,0.2)] transition group"
-                    title="Expand sidebar (সাইডবার বড় করুন)"
+                    title="Expand sidebar"
                     aria-label="Expand sidebar"
                   >
                     <PanelLeftOpen className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -424,7 +463,7 @@ export function MilestonesContainer() {
                     type="button"
                     onClick={toggleCollapse}
                     className="hidden lg:flex items-center justify-center w-8 h-8 rounded-xl text-slate-400 hover:text-amber-200 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-400/40 transition group"
-                    title="Collapse sidebar (সাইডবার ছোট করুন)"
+                    title="Collapse sidebar"
                     aria-label="Collapse sidebar"
                   >
                     <PanelLeftClose className="w-4 h-4 transition-transform group-hover:scale-110" />
@@ -565,7 +604,7 @@ export function MilestonesContainer() {
                   &ldquo;Never step away from the center of the circle merely to widen your circumference... This anchor point is your roots.&rdquo;
                 </p>
                 <div className="text-[10px] text-amber-400/70 font-badge text-center font-semibold">
-                  — চিঠির দর্শন (The Letter of Roots)
+                  — The Letter of Roots
                 </div>
               </div>
 
@@ -574,7 +613,7 @@ export function MilestonesContainer() {
                 <div className="hidden lg:flex justify-center">
                   <div
                     className="w-9 h-9 rounded-xl flex items-center justify-center text-amber-400/60 hover:text-amber-300 hover:bg-amber-500/10 cursor-help transition"
-                    title="&ldquo;Never step away from the center of the circle merely to widen your circumference... This anchor point is your roots.&rdquo; — চিঠির দর্শন"
+                    title="&ldquo;Never step away from the center of the circle merely to widen your circumference... This anchor point is your roots.&rdquo; — The Letter of Roots"
                   >
                     <Anchor className="w-4 h-4" />
                   </div>
@@ -619,6 +658,8 @@ export function MilestonesContainer() {
                   onToggleTask={handleToggleTask}
                   onDeleteTask={handleDeleteTask}
                   onCarryOverTasks={handleCarryOverTasks}
+                  onUpdateTask={handleUpdateTask}
+                  onReorderTasks={handleReorderTasks}
                 />
               )}
 

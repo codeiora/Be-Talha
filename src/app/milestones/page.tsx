@@ -12,7 +12,7 @@ export default function MilestonesPage() {
   return (
     <CosmicPageShell
       title="Celestial Milestones"
-      bengaliTitle="মহাজাগতিক মাইলস্টোন ও দিগন্ত"
+      bengaliTitle="Cascading Horizons & Command Orbit"
       activeModule="milestones"
     >
       <MilestonesContainer />

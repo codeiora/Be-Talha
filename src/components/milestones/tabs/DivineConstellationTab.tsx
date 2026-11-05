@@ -37,10 +37,10 @@ interface PillarCard {
 const HIFZ_PILLARS: PillarCard[] = [
   {
     id: "sabaq",
-    number: "০১",
+    number: "01",
     name: "Sabaq Studio",
-    bengali: "সবক (দৈনিক নতুন মুখস্থ)",
-    tagline: "আজকের তাজা বীজ। গভীর একাগ্রতা, বিশুদ্ধ তাজবীদ ও অনুধাবনসহ নতুন আয়াত মুখস্থকরণ।",
+    bengali: "Daily Sabaq (New Seed)",
+    tagline: "Today's fresh seed. Memorize new verses with deep focus, immaculate Tajweed, and contemplation.",
     href: "/hifz/sabaq",
     icon: Sparkles,
     badge: "New Seed",
@@ -50,10 +50,10 @@ const HIFZ_PILLARS: PillarCard[] = [
   },
   {
     id: "sabqi",
-    number: "০২",
+    number: "02",
     name: "Sabqi Orbit",
-    bengali: "সবকী (সাম্প্রতিক আয়াত)",
-    tagline: "নতুন মুখস্থ করা পারার প্রাচীর। সদ্য মুখস্থ পৃষ্ঠাগুলো যাতে মজবুত শিকড় গড়ে তোলে।",
+    bengali: "Sabqi Orbit (Recent Memorization)",
+    tagline: "Fortress of recent Juz. Strengthen freshly memorized pages so their roots run unshakeably deep.",
     href: "/hifz/sabqi",
     icon: Layers,
     badge: "Recent Wall",
@@ -63,10 +63,10 @@ const HIFZ_PILLARS: PillarCard[] = [
   },
   {
     id: "amukhta",
-    number: "০৩",
+    number: "03",
     name: "Amukhta Daur",
-    bengali: "আমুক্তা (সার্বিক দাওর ও রিভিশন)",
-    tagline: "আকাশে তারার আলো জিইয়ে রাখা। সম্পূর্ণ হিফজ রুটিনমাফিক রিভিশনে কোনো সুরা যাতে নিভে না যায়।",
+    bengali: "Amukhta Daur (Full Revision)",
+    tagline: "Preserve celestial brilliance. Systematic full-revision cycle so no surah's light ever fades.",
     href: "/hifz/amukhta",
     icon: Compass,
     badge: "Eternal Stars",
@@ -76,10 +76,10 @@ const HIFZ_PILLARS: PillarCard[] = [
   },
   {
     id: "takrar",
-    number: "০৪",
+    number: "04",
     name: "Takrar Loop",
-    bengali: "তাকরার (চক্রাকার পুনরাবৃত্তি)",
-    tagline: "অবিরাম রিভিশন লুপ (১০x, ২০x, ৪০x)। অবচেতন মনে আয়াতের সুর গেঁথে ফেলার বিশেষ পদ্ধতি।",
+    bengali: "Takrar Loop (Cyclic Repetition)",
+    tagline: "Repetition loops (10x, 20x, 40x). Madrasah method to embed verses permanently into subconscious memory.",
     href: "/hifz/takrar",
     icon: RotateCcw,
     badge: "Deep Orbit",
@@ -89,10 +89,10 @@ const HIFZ_PILLARS: PillarCard[] = [
   },
   {
     id: "mutashabihat",
-    number: "০৫",
+    number: "05",
     name: "Mutashabihaat Vault",
-    bengali: "মুতাশাবিহাত (সাদৃশ্যপূর্ণ আয়াত)",
-    tagline: "পবিত্র কুরআনের যে আয়াতগুলো একে অপরের সাথে মিলে ভুল হতে পারে, সেগুলোর নিখুঁত পার্থক্য ও সতর্কতা।",
+    bengali: "Mutashabihaat Vault (Similar Ayahs)",
+    tagline: "Master similar and easily conflated verses with surgical precision and cross-reference vigilance.",
     href: "/hifz/mutashabihaat",
     icon: ShieldAlert,
     badge: "Precision Armor",
@@ -133,7 +133,7 @@ export function DivineConstellationTab() {
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-yellow-500/15 border border-amber-400/40 text-amber-300 text-xs font-badge tracking-wider shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <Star className="w-3.5 h-3.5 text-amber-300 fill-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.9)] animate-pulse" />
-              <span>ঐশী নক্ষত্রমণ্ডল • DIVINE CONSTELLATION</span>
+              <span>DIVINE CONSTELLATION</span>
             </div>
 
             <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ export function DivineConstellationTab() {
               In Search of Light • <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-yellow-300">Quranic Orbit</span>
             </h2>
             <p className="text-sm sm:text-base text-slate-300 font-subheading leading-relaxed max-w-3xl">
-              হিফজ ও কুরআন কেবল একটি লক্ষ্য নয়; এটি একটি আজীবন মহাজাগতিক পরিভ্রমণ। নোঙরের (The Anchor) শিকড় শক্ত করে আসমানের দিকে ডানা মেলে দেওয়ার ঐশী পথ।
+              Hifz and the Holy Quran are not merely a goal; they are a lifelong cosmic pilgrimage. Ground your anchor deep into the earth and soar toward the heavens.
             </p>
           </div>
 
@@ -159,7 +159,7 @@ export function DivineConstellationTab() {
               <Compass className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
               <span>
                 &ldquo;Awaiting the dawn of Fajr&apos;s gentle light— Just as pitch darkness colors the nocturnal sky; The melody of his Hijazi wisdom flows high, echoing across millions of light-years to stars in the night!&rdquo;
-                <span className="block not-italic font-bold text-amber-400 text-xs mt-1.5">— চিঠির দর্শন (Care of: Childhood)</span>
+                <span className="block not-italic font-bold text-amber-400 text-xs mt-1.5">— The Letter of Roots (Care of: Childhood)</span>
               </span>
             </p>
           </div>
@@ -171,7 +171,7 @@ export function DivineConstellationTab() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-badge text-xs font-bold transition shadow-[0_0_25px_rgba(245,158,11,0.35)] active:scale-95 group"
             >
               <Sparkles className="w-4 h-4 text-slate-950 group-hover:rotate-12 transition" />
-              <span>Launch 3D Celestial Sky Canvas (মূল মহাজাগতিক আকাশ)</span>
+              <span>Launch 3D Celestial Sky Canvas</span>
               <ArrowRight className="w-3.5 h-3.5" />
             </Link>
 
@@ -192,10 +192,10 @@ export function DivineConstellationTab() {
           <div className="space-y-0.5">
             <h3 className="text-base font-heading text-white font-semibold flex items-center gap-2">
               <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-              <span>The Five Madrasah Pillars (হিফজ প্রতিরক্ষা ও অগ্রযাত্রার ৫টি স্তম্ভ)</span>
+              <span>The Five Madrasah Pillars</span>
             </h3>
             <p className="text-xs text-slate-400 font-subheading">
-              প্রতিটি স্তম্ভ কুরআনকে মনের অতল গহীনে চিরস্থায়ীভাবে সুরক্ষিত রাখার নিখুঁত দুর্গ।
+              Five time-tested madrasah bastions engineered to protect and etch the Quran permanently into your soul.
             </p>
           </div>
         </div>
@@ -270,13 +270,13 @@ export function DivineConstellationTab() {
                     114 Star Constellations
                   </h4>
                   <div className="text-xs font-bengali text-amber-200/90 font-medium mt-0.5">
-                    সম্পূর্ণ কুরআনের ত্রিমাত্রিক মানচিত্র
+                    Interactive 3D Quran Constellation
                   </div>
                 </div>
               </div>
 
               <p className="text-xs text-slate-400 font-subheading leading-relaxed">
-                প্রতিটি সুরা একটি জ্বলজ্বলে নক্ষত্র। রিভিশন ছাড়া আলো ম্লান হওয়া বা সম্পূর্ণ আলোকিত হওয়ার জীবন্ত কসমিক স্কাই ক্যানভাস।
+                Every Surah shines as a living star. Regular revision keeps them ablaze in full radiance across your personal cosmic canvas.
               </p>
             </div>
 
@@ -296,10 +296,10 @@ export function DivineConstellationTab() {
           </div>
           <div>
             <div className="text-xs font-badge text-amber-400 uppercase tracking-wider">
-              Divine Promise • সূরা আল-ক্বামার (৫৪:১৭)
+              Divine Promise • Surah Al-Qamar (54:17)
             </div>
             <div className="text-sm font-subheading text-slate-200 mt-0.5">
-              &ldquo;আর আমরা তো স্মরণ রাখার জন্য কুরআনকে সহজ করে দিয়েছি, অতএব কোনো উপদেশ গ্রহণকারী আছে কি?&rdquo;
+              &ldquo;And We have certainly made the Quran easy for remembrance, so is there anyone who will remember?&rdquo;
             </div>
           </div>
         </div>

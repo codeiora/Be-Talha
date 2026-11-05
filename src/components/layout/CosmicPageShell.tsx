@@ -92,7 +92,7 @@ export function CosmicPageShell({
 
     if (!isUnlocked) {
       return (
-        <div className="relative isolate min-h-screen text-slate-100 overflow-x-hidden">
+        <div className="relative isolate min-h-screen text-slate-100 overflow-x-clip">
           <InteractiveGalaxy onInspectChange={setIsInspectingGalaxy} />
           <SecretGate onUnlock={handleUnlock} />
         </div>
@@ -101,7 +101,7 @@ export function CosmicPageShell({
   }
 
   return (
-    <div className="relative isolate min-h-screen text-slate-100 overflow-x-hidden flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
+    <div className="relative isolate min-h-screen text-slate-100 overflow-x-clip flex flex-col justify-between selection:bg-cyan-500/30 selection:text-cyan-200">
       {/* 360-Degree Interactive Galaxy Canvas */}
       <InteractiveGalaxy onInspectChange={setIsInspectingGalaxy} />
 
@@ -171,12 +171,21 @@ export function CosmicPageShell({
       >
         <motion.div
           initial={false}
-          animate={{
-            opacity: isInspectingGalaxy ? 0 : 1,
-            y: isInspectingGalaxy ? 15 : 0,
-            filter: isInspectingGalaxy ? "blur(10px)" : "blur(0px)",
-            pointerEvents: isInspectingGalaxy ? "none" : "auto",
-          }}
+          animate={
+            isInspectingGalaxy
+              ? {
+                  opacity: 0,
+                  y: 15,
+                  filter: "blur(10px)",
+                  pointerEvents: "none",
+                }
+              : {
+                  opacity: 1,
+                  y: 0,
+                  filter: "none",
+                  pointerEvents: "auto",
+                }
+          }
           transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
         >
           {children}

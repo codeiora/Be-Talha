@@ -122,6 +122,7 @@ export function DailyHorizonDashboard({
       category: newCategory,
       priority: newPriority,
       points: newPoints,
+      estimatedMinutes: 25,
       completed: false,
       linkedWeeklyGoalId: linkedWeeklyId || undefined,
     });
@@ -749,7 +750,7 @@ export function DailyHorizonDashboard({
                     <option value="deen">Deen &amp; Hifz</option>
                     <option value="intellect">Intellect &amp; Craft</option>
                     <option value="body">Body &amp; Armor</option>
-                    <option value="crucible">Crucible</option>
+                    <option value="tazkiyah">Tazkiyah &amp; Soul</option>
                     <option value="other">Personal</option>
                   </select>
                 </div>
@@ -882,8 +883,8 @@ export function DailyHorizonDashboard({
             <h4 className="text-base font-heading text-white leading-snug">
               You&apos;re doing amazing, Talha! 💜
             </h4>
-            <p className="text-xs text-slate-300 leading-relaxed font-subheading font-bengali">
-              &ldquo;ছোট ছোট নিয়মিত আমলই পাহাড় গড়ে তোলে। Keep steady discipline and don&apos;t forget your inner peace.&rdquo;
+            <p className="text-xs text-slate-300 leading-relaxed font-subheading">
+              &ldquo;Small, consistent deeds build unshakeable mountains. Keep steady discipline and preserve your inner peace.&rdquo;
             </p>
 
             <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] font-badge text-indigo-300">
@@ -897,22 +898,42 @@ export function DailyHorizonDashboard({
             <div className="flex items-center justify-between pb-2 border-b border-white/10">
               <span className="text-xs font-badge tracking-wider text-slate-400 flex items-center gap-1.5">
                 <BookOpen className="w-3.5 h-3.5 text-violet-400" />
-                Today&apos;s Anchor Note
+                The Cosmic Mirror Note
               </span>
-              <button
-                onClick={() => setIsNoteModalOpen(true)}
-                className="text-xs font-badge text-cyan-400 hover:underline"
-              >
-                Edit
-              </button>
+              <div className="flex items-center gap-2">
+                {dailyNote.stateOfHeart && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-slate-300 font-mono">
+                    {dailyNote.stateOfHeart === "full_moon" && "🌕 Full Moon"}
+                    {dailyNote.stateOfHeart === "clear_sky" && "🌌 Clear Sky"}
+                    {dailyNote.stateOfHeart === "eclipse" && "🌑 Eclipse"}
+                    {dailyNote.stateOfHeart === "nebula" && "🌪️ Nebula"}
+                  </span>
+                )}
+                <button
+                  onClick={() => setIsNoteModalOpen(true)}
+                  className="text-xs font-badge text-cyan-400 hover:underline"
+                >
+                  Edit
+                </button>
+              </div>
             </div>
 
             <div className="space-y-1.5">
-              <div className="text-[11px] font-badge text-amber-400 uppercase">Core Focus:</div>
+              <div className="text-[11px] font-badge text-amber-400 uppercase flex items-center gap-1">
+                <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
+                <span>North Star Focus:</span>
+              </div>
               <p className="text-xs font-subheading text-slate-200 line-clamp-3 leading-relaxed">
                 {dailyNote.coreFocus || "No core focus logged for today yet."}
               </p>
             </div>
+
+            {dailyNote.shukrParticles && dailyNote.shukrParticles.length > 0 && (
+              <div className="flex items-center gap-1.5 text-[11px] font-mono text-amber-300/90 bg-amber-500/10 px-2.5 py-1 rounded-xl border border-amber-400/20">
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                <span>{dailyNote.shukrParticles.length} Shukr Light Particles in Vault</span>
+              </div>
+            )}
 
             {dailyNote.ayahReminder && (
               <div className="pt-2 border-t border-white/5 space-y-1">
